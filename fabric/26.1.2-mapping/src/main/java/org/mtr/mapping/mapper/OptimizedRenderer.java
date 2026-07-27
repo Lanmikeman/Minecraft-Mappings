@@ -17,4 +17,10 @@ public final class OptimizedRenderer extends DummyClass {
 		batchManager.queue(model.getVertexArrays(), state);
 	}
 	@MappedMethod public void drawAll() { batchManager.drawAll(shaderManager); }
+
+	@MappedMethod
+	public static boolean hasOptimizedRendering() {
+		return false; // TODO GL pipeline
+	}
+
 }

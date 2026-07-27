@@ -1,24 +1,32 @@
 package org.mtr.mapping.mapper;
 
 import org.mtr.mapping.annotation.MappedMethod;
+import org.mtr.mapping.holder.CompoundTag;
+import org.mtr.mapping.holder.PersistentStateAbstractMapping;
 import org.mtr.mapping.holder.ServerWorld;
-import org.mtr.mapping.tool.DummyClass;
 
 import java.util.function.Supplier;
 
-/** SavedData API changed in 26.1; bridge stub with stable MappedMethod surface. */
-public abstract class PersistenceStateExtension extends DummyClass {
-	@MappedMethod
-	public PersistenceStateExtension() {}
+public abstract class PersistenceStateExtension extends PersistentStateAbstractMapping {
 
 	@MappedMethod
-	public abstract void readNbt(org.mtr.mapping.holder.CompoundTag compoundTag);
+	public PersistenceStateExtension(String key) {
+		super();
+	}
 
 	@MappedMethod
-	public abstract org.mtr.mapping.holder.CompoundTag writeNbt();
+	public abstract void readNbt(CompoundTag tag);
 
 	@MappedMethod
-	public static <T extends PersistenceStateExtension> T register(ServerWorld serverWorld, Supplier<T> supplier, String id) {
+	public abstract CompoundTag writeNbt2(CompoundTag compoundTag);
+
+	@MappedMethod
+	public void markDirty2() {
+		setDirty2();
+	}
+
+	@MappedMethod
+	public static PersistenceStateExtension register(ServerWorld serverWorld, Supplier<PersistenceStateExtension> supplier, String modId) {
 		return supplier.get();
 	}
 }

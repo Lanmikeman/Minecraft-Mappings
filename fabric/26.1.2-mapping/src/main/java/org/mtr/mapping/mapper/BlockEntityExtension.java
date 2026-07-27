@@ -46,4 +46,16 @@ public abstract class BlockEntityExtension extends BlockEntityAbstractMapping {
 		return ClientboundBlockEntityDataPacket.create(this);
 	}
 
+
+	@MappedMethod
+	public void blockEntityTick() {
+	}
+
+
+	/** Yarn BlockEntity#getPos -> official getBlockPos() */
+	@MappedMethod
+	public BlockPos getPos2() {
+		return new BlockPos(getBlockPos());
+	}
+
 }

@@ -20,8 +20,8 @@ public class ClickableWidgetExtension extends ClickableWidgetAbstractMapping {
 	}
 
 	@MappedMethod
-	public ClickableWidgetExtension(int x, int y, int width, int height, MutableText message) {
-		super(x, y, width, height, new Text(message.data));
+	public ClickableWidgetExtension(int x, int y, int width, int height, MutableComponent message) {
+		super(x, y, width, height, new Component(message.data));
 	}
 
 	@MappedMethod

@@ -21,8 +21,8 @@ public class TexturedButtonWidgetExtension extends TexturedButtonWidgetAbstractM
 	}
 
 	@MappedMethod
-	public TexturedButtonWidgetExtension(int x, int y, int width, int height, Identifier normalTexture, Identifier highlightedTexture, Identifier disabledTexture, org.mtr.mapping.holder.PressAction onPress, MutableText message) {
-		super(x, y, width, height, new ButtonTextures(formatIdentifier(normalTexture), formatIdentifier(disabledTexture), formatIdentifier(highlightedTexture)), onPress, new Text(message.data));
+	public TexturedButtonWidgetExtension(int x, int y, int width, int height, Identifier normalTexture, Identifier highlightedTexture, Identifier disabledTexture, org.mtr.mapping.holder.PressAction onPress, MutableComponent message) {
+		super(x, y, width, height, new ButtonTextures(formatIdentifier(normalTexture), formatIdentifier(disabledTexture), formatIdentifier(highlightedTexture)), onPress, new Component(message.data));
 	}
 
 	@MappedMethod
@@ -75,10 +75,10 @@ public class TexturedButtonWidgetExtension extends TexturedButtonWidgetAbstractM
 		return super.isHovered();
 	}
 
-	private static net.minecraft.util.Identifier formatIdentifier(Identifier identifier) {
+	private static net.minecraft.resources.Identifier formatIdentifier(Identifier identifier) {
 		final String beginning = "textures/gui/sprites/";
 		final String namespace = identifier.getNamespace();
 		final String path = identifier.getPath();
-		return new net.minecraft.util.Identifier(namespace, (path.startsWith(beginning) ? path.substring(beginning.length()) : path).replace(".png", ""));
+		return new net.minecraft.resources.Identifier(namespace, (path.startsWith(beginning) ? path.substring(beginning.length()) : path).replace(".png", ""));
 	}
 }

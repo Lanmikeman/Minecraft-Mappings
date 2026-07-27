@@ -1,8 +1,8 @@
 package org.mtr.mapping.mapper;
 
-import net.minecraft.block.Block;
-import net.minecraft.state.StateManager;
-import net.minecraft.text.Text;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.network.chat.Component;
 import org.mtr.mapping.annotation.MappedMethod;
 import org.mtr.mapping.holder.*;
 import org.mtr.mapping.tool.HolderBase;
@@ -19,14 +19,14 @@ public class StairsBlockExtension extends StairsBlockAbstractMapping implements 
 
 	@Deprecated
 	@Override
-	protected final void appendProperties(StateManager.Builder<Block, net.minecraft.block.BlockState> builder) {
+	protected final void appendProperties(StateDefinition.Builder<Block, net.minecraft.world.level.block.state.BlockState> builder) {
 		appendPropertiesHelper(builder);
 	}
 
 	@Deprecated
 	@Override
-	public final void appendTooltip(net.minecraft.item.ItemStack stack, @Nullable net.minecraft.world.BlockView world, List<Text> tooltip, net.minecraft.client.item.TooltipContext options) {
-		appendTooltipHelper(new ItemStack(stack), world == null ? null : new BlockView(world), tooltip, new TooltipContext(options));
+	public final void appendTooltip(net.minecraft.world.item.ItemStack stack, @Nullable net.minecraft.world.level.BlockGetter world, List<Component> tooltip, net.minecraft.world.item.Item$TooltipContext options) {
+		appendTooltipHelper(new ItemStack(stack), world == null ? null : new BlockGetter(world), tooltip, new TooltipContext(options));
 	}
 
 	@MappedMethod

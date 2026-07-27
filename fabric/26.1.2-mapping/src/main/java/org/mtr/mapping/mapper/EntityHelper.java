@@ -1,6 +1,6 @@
 package org.mtr.mapping.mapper;
 
-import net.minecraft.entity.ItemEntity;
+import net.minecraft.world.entity.item.ItemEntity;
 import org.mtr.mapping.annotation.MappedMethod;
 import org.mtr.mapping.holder.BlockPos;
 import org.mtr.mapping.holder.Entity;
@@ -37,7 +37,7 @@ public final class EntityHelper extends DummyClass {
 	}
 
 	@MappedMethod
-	public static void spawnItem(ServerWorld serverWorld, BlockPos blockPos, ItemStack itemStack) {
+	public static void spawnItem(ServerLevel serverWorld, BlockPos blockPos, ItemStack itemStack) {
 		serverWorld.data.spawnEntity(new ItemEntity(serverWorld.data, blockPos.getX() + 0.5, blockPos.getY() + 0.5, blockPos.getZ() + 0.5, itemStack.data));
 	}
 }

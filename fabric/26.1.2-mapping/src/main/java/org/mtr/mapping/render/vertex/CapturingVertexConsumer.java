@@ -1,6 +1,6 @@
 package org.mtr.mapping.render.vertex;
 
-import net.minecraft.client.render.VertexConsumer;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import org.mtr.mapping.holder.Vector3f;
 import org.mtr.mapping.render.batch.MaterialProperties;
 import org.mtr.mapping.render.model.RawMesh;

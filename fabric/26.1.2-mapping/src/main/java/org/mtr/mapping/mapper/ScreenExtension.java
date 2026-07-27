@@ -20,8 +20,8 @@ public class ScreenExtension extends ScreenAbstractMapping {
 	}
 
 	@MappedMethod
-	protected ScreenExtension(MutableText title) {
-		super(new Text(title.data));
+	protected ScreenExtension(MutableComponent title) {
+		super(new Component(title.data));
 	}
 
 	@MappedMethod
@@ -50,12 +50,12 @@ public class ScreenExtension extends ScreenAbstractMapping {
 	}
 
 	@MappedMethod
-	public final void addChild(ClickableWidget child) {
+	public final void addChild(AbstractWidget child) {
 		addDrawableChild(child.data);
 	}
 
 	@MappedMethod
-	public final void addSelectableChild(ClickableWidget child) {
+	public final void addSelectableChild(AbstractWidget child) {
 		addSelectableChild(child.data);
 	}
 

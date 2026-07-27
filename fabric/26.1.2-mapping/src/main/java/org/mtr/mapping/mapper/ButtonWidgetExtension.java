@@ -21,8 +21,8 @@ public class ButtonWidgetExtension extends ButtonWidgetAbstractMapping {
 	}
 
 	@MappedMethod
-	public ButtonWidgetExtension(int x, int y, int width, int height, MutableText message, org.mtr.mapping.holder.PressAction onPress) {
-		super(x, y, width, height, new Text(message.data), onPress, Supplier::get);
+	public ButtonWidgetExtension(int x, int y, int width, int height, MutableComponent message, org.mtr.mapping.holder.PressAction onPress) {
+		super(x, y, width, height, new Component(message.data), onPress, Supplier::get);
 	}
 
 	@MappedMethod

@@ -1,6 +1,6 @@
 package org.mtr.mapping.mapper;
 
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.Minecraft;
 import org.mtr.mapping.annotation.MappedMethod;
 import org.mtr.mapping.holder.*;
 
@@ -31,17 +31,17 @@ public abstract class AbstractSoundInstanceExtension extends AbstractSoundInstan
 	}
 
 	@MappedMethod
-	protected AbstractSoundInstanceExtension(SoundEvent sound, SoundCategory category) {
-		super(sound, category, new Random(net.minecraft.util.math.random.Random.create()));
+	protected AbstractSoundInstanceExtension(SoundEvent sound, SoundSource category) {
+		super(sound, category, new Random(net.minecraft.world.phys.random.Random.create()));
 	}
 
 	@MappedMethod
-	protected AbstractSoundInstanceExtension(Identifier soundId, SoundCategory category) {
-		super(soundId, category, new Random(net.minecraft.util.math.random.Random.create()));
+	protected AbstractSoundInstanceExtension(Identifier soundId, SoundSource category) {
+		super(soundId, category, new Random(net.minecraft.world.phys.random.Random.create()));
 	}
 
 	@MappedMethod
 	public static void iterateSoundIds(Consumer<Identifier> consumer) {
-		MinecraftClient.getInstance().getSoundManager().getKeys().forEach(identifier -> consumer.accept(new Identifier(identifier)));
+		Minecraft.getInstance().getSoundManager().getKeys().forEach(identifier -> consumer.accept(new Identifier(identifier)));
 	}
 }

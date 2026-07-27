@@ -2,10 +2,10 @@ package org.mtr.mapping.render.shader;
 
 import com.google.common.collect.ImmutableMap;
 import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.client.gl.ShaderProgram;
-import net.minecraft.client.render.VertexFormat;
-import net.minecraft.client.render.VertexFormatElement;
-import net.minecraft.client.render.VertexFormats;
+import com.mojang.blaze3d.shaders.ShaderProgram;
+import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.blaze3d.vertex.VertexFormatElement;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import org.mtr.mapping.holder.Matrix4f;
 import org.mtr.mapping.holder.MinecraftClient;
 import org.mtr.mapping.holder.Window;
@@ -23,14 +23,14 @@ public final class ShaderManager {
 
 	private static final VertexFormatElement MINECRAFT_ELEMENT_MATRIX = new VertexFormatElement(0, VertexFormatElement.ComponentType.FLOAT, VertexFormatElement.Type.GENERIC, 16);
 	private static final VertexFormat MINECRAFT_VERTEX_FORMAT_BLOCK = new VertexFormat(ImmutableMap.<String, VertexFormatElement>builder()
-			.put("Position", VertexFormats.POSITION_ELEMENT)
-			.put("Color", VertexFormats.COLOR_ELEMENT)
-			.put("UV0", VertexFormats.UV_ELEMENT)
-			.put("UV1", VertexFormats.OVERLAY_ELEMENT)
-			.put("UV2", VertexFormats.LIGHT_ELEMENT)
-			.put("Normal", VertexFormats.NORMAL_ELEMENT)
+			.put("Position", DefaultVertexFormat.POSITION_ELEMENT)
+			.put("Color", DefaultVertexFormat.COLOR_ELEMENT)
+			.put("UV0", DefaultVertexFormat.UV_ELEMENT)
+			.put("UV1", DefaultVertexFormat.OVERLAY_ELEMENT)
+			.put("UV2", DefaultVertexFormat.LIGHT_ELEMENT)
+			.put("Normal", DefaultVertexFormat.NORMAL_ELEMENT)
 			.put("ModelMat", MINECRAFT_ELEMENT_MATRIX)
-			.put("Padding", VertexFormats.PADDING_ELEMENT)
+			.put("Padding", DefaultVertexFormat.PADDING_ELEMENT)
 			.build());
 
 	public boolean isReady() {
@@ -40,7 +40,7 @@ public final class ShaderManager {
 	public void reloadShaders() {
 		shaders.values().forEach(ShaderProgram::close);
 		shaders.clear();
-		final PatchingResourceProvider patchingResourceProvider = new PatchingResourceProvider(MinecraftClient.getInstance().getResourceManager());
+		final PatchingResourceProvider patchingResourceProvider = new PatchingResourceProvider(Minecraft.getInstance().getResourceManager());
 		loadShader(patchingResourceProvider, getShaderName(OptimizedModel.ShaderType.CUTOUT));
 		loadShader(patchingResourceProvider, getShaderName(OptimizedModel.ShaderType.TRANSLUCENT));
 		loadShader(patchingResourceProvider, getShaderName(OptimizedModel.ShaderType.CUTOUT_GLOWING));
@@ -102,7 +102,7 @@ public final class ShaderManager {
 			shaderProgram.gameTime.set(RenderSystem.getShaderGameTime());
 		}
 		if (shaderProgram.screenSize != null) {
-			final Window window = MinecraftClient.getInstance().getWindow();
+			final Window window = Minecraft.getInstance().getWindow();
 			shaderProgram.screenSize.set(window.getWidth(), window.getHeight());
 		}
 

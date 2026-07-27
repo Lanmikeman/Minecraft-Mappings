@@ -1,6 +1,6 @@
 package org.mtr.mapping.mapper;
 
-import net.minecraft.world.GameRules;
+import net.minecraft.world.level.gamerules.GameRules;
 import org.mtr.mapping.annotation.MappedMethod;
 import org.mtr.mapping.holder.MinecraftServer;
 

@@ -3,9 +3,9 @@ package org.mtr.mapping.render.shader;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import net.minecraft.resource.Resource;
-import net.minecraft.resource.ResourceFactory;
-import net.minecraft.util.Identifier;
+import net.minecraft.server.packs.resources.Resource;
+import net.minecraft.server.packs.resources.ResourceProvider;
+import net.minecraft.resources.Identifier;
 import org.apache.commons.io.IOUtils;
 import org.mtr.mapping.holder.ResourceManager;
 import org.mtr.mapping.render.tool.GlStateTracker;
@@ -16,9 +16,9 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
-public final class PatchingResourceProvider implements ResourceFactory {
+public final class PatchingResourceProvider implements ResourceProvider {
 
-	private final ResourceFactory resourceFactory;
+	private final ResourceProvider resourceFactory;
 
 	public PatchingResourceProvider(ResourceManager resourceManager) {
 		resourceFactory = resourceManager.data;

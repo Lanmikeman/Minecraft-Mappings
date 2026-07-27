@@ -1,9 +1,9 @@
 package org.mtr.mapping.mapper;
 
 import net.minecraft.MinecraftVersion;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.resource.Resource;
-import net.minecraft.resource.ResourceType;
+import net.minecraft.client.Minecraft;
+import net.minecraft.server.packs.resources.Resource;
+import net.minecraft.server.packs.PackType;
 import org.apache.commons.io.IOUtils;
 import org.mtr.mapping.annotation.MappedMethod;
 import org.mtr.mapping.holder.Identifier;
@@ -20,7 +20,7 @@ public final class ResourceManagerHelper extends DummyClass {
 	@MappedMethod
 	public static void readResource(Identifier identifier, Consumer<InputStream> consumer) {
 		try {
-			final Optional<Resource> optionalResource = MinecraftClient.getInstance().getResourceManager().getResource(identifier.data);
+			final Optional<Resource> optionalResource = Minecraft.getInstance().getResourceManager().getResource(identifier.data);
 			optionalResource.ifPresent(resource -> readResource(resource, consumer));
 		} catch (Exception e) {
 			logException(e);
@@ -43,7 +43,7 @@ public final class ResourceManagerHelper extends DummyClass {
 	@MappedMethod
 	public static void readAllResources(Identifier identifier, Consumer<InputStream> consumer) {
 		try {
-			MinecraftClient.getInstance().getResourceManager().getAllResources(identifier.data).forEach(resource -> readResource(resource, consumer));
+			Minecraft.getInstance().getResourceManager().getAllResources(identifier.data).forEach(resource -> readResource(resource, consumer));
 		} catch (Exception e) {
 			logException(e);
 		}
@@ -52,7 +52,7 @@ public final class ResourceManagerHelper extends DummyClass {
 	@MappedMethod
 	public static void readDirectory(String path, BiConsumer<Identifier, InputStream> consumer) {
 		try {
-			MinecraftClient.getInstance().getResourceManager()
+			Minecraft.getInstance().getResourceManager()
 					.findAllResources(path, identifier -> true)
 					.forEach((identifier, resources) -> resources.forEach(resource -> readResource(resource, inputStream -> consumer.accept(new Identifier(identifier), inputStream))));
 		} catch (Exception e) {
@@ -70,11 +70,11 @@ public final class ResourceManagerHelper extends DummyClass {
 
 	@MappedMethod
 	public static int getResourcePackVersion() {
-		return MinecraftVersion.create().getResourceVersion(ResourceType.CLIENT_RESOURCES);
+		return MinecraftVersion.create().getResourceVersion(PackType.CLIENT_RESOURCES);
 	}
 
 	@MappedMethod
 	public static int getDataPackVersion() {
-		return MinecraftVersion.create().getResourceVersion(ResourceType.SERVER_DATA);
+		return MinecraftVersion.create().getResourceVersion(PackType.SERVER_DATA);
 	}
 }

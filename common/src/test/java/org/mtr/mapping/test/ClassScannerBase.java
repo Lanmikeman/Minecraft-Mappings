@@ -242,10 +242,12 @@ public abstract class ClassScannerBase {
 	}
 
 	private static String getGenerics(GenericDeclaration genericDeclaration, boolean impliedType, boolean getBounds, @Nullable Map<Class<?>, ClassInfo> classMap) {
+		// implied diamond must be "<>", not "<,>" for multi-parameter types
+		if (impliedType) {
+			return genericDeclaration.getTypeParameters().length > 0 ? "<>" : "";
+		}
 		return getStringFromMethod(stringBuilder -> appendIfNotEmpty(stringBuilder, genericDeclaration.getTypeParameters(), "<", ">", ",", typeVariable -> {
-			if (impliedType) {
-				return "";
-			} else if (getBounds) {
+			if (getBounds) {
 				return String.format("%s%s", typeVariable.getName(), getStringFromMethod(extendsStringBuilder -> appendIfNotEmpty(extendsStringBuilder, typeVariable.getBounds(), " extends ", "", "&", type -> {
 					if (type instanceof Class && classMap != null) {
 						final ClassInfo classInfo = classMap.get(type);
@@ -319,6 +321,8 @@ public abstract class ClassScannerBase {
 		final boolean isInterface;
 		final boolean isEnum;
 		private final List<String> options;
+		/** Tracks emitted member keys to avoid duplicates (aliases / hidden fields). */
+		final java.util.Set<String> generatedMembers = new java.util.HashSet<>();
 
 		private ClassInfo(String className, boolean isAbstractMapping, boolean isInterface, boolean isEnum, String... options) {
 			this.className = className;

@@ -47,32 +47,32 @@ public class EventRegistry extends DummyClass {
 	}
 
 	@MappedMethod
-	public void registerStartWorldTick(Consumer<ServerWorld> consumer) {
-		ServerTickEvents.START_WORLD_TICK.register(serverWorld -> consumer.accept(new ServerWorld(serverWorld)));
+	public void registerStartWorldTick(Consumer<ServerLevel> consumer) {
+		ServerTickEvents.START_WORLD_TICK.register(serverWorld -> consumer.accept(new ServerLevel(serverWorld)));
 	}
 
 	@MappedMethod
-	public void registerEndWorldTick(Consumer<ServerWorld> consumer) {
-		ServerTickEvents.END_WORLD_TICK.register(serverWorld -> consumer.accept(new ServerWorld(serverWorld)));
+	public void registerEndWorldTick(Consumer<ServerLevel> consumer) {
+		ServerTickEvents.END_WORLD_TICK.register(serverWorld -> consumer.accept(new ServerLevel(serverWorld)));
 	}
 
 	@MappedMethod
-	public void registerPlayerJoin(BiConsumer<MinecraftServer, ServerPlayerEntity> consumer) {
-		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> consumer.accept(new MinecraftServer(server), new ServerPlayerEntity(handler.player)));
+	public void registerPlayerJoin(BiConsumer<MinecraftServer, ServerPlayer> consumer) {
+		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> consumer.accept(new MinecraftServer(server), new ServerPlayer(handler.player)));
 	}
 
 	@MappedMethod
-	public void registerPlayerDisconnect(BiConsumer<MinecraftServer, ServerPlayerEntity> consumer) {
-		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> consumer.accept(new MinecraftServer(server), new ServerPlayerEntity(handler.player)));
+	public void registerPlayerDisconnect(BiConsumer<MinecraftServer, ServerPlayer> consumer) {
+		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> consumer.accept(new MinecraftServer(server), new ServerPlayer(handler.player)));
 	}
 
 	@MappedMethod
-	public void registerChunkLoad(BiConsumer<ServerWorld, WorldChunk> consumer) {
-		ServerChunkEvents.CHUNK_LOAD.register((serverWorld, worldChunk) -> consumer.accept(new ServerWorld(serverWorld), new WorldChunk(worldChunk)));
+	public void registerChunkLoad(BiConsumer<ServerLevel, WorldChunk> consumer) {
+		ServerChunkEvents.CHUNK_LOAD.register((serverWorld, worldChunk) -> consumer.accept(new ServerLevel(serverWorld), new WorldChunk(worldChunk)));
 	}
 
 	@MappedMethod
-	public void registerChunkUnload(BiConsumer<ServerWorld, WorldChunk> consumer) {
-		ServerChunkEvents.CHUNK_UNLOAD.register((serverWorld, worldChunk) -> consumer.accept(new ServerWorld(serverWorld), new WorldChunk(worldChunk)));
+	public void registerChunkUnload(BiConsumer<ServerLevel, WorldChunk> consumer) {
+		ServerChunkEvents.CHUNK_UNLOAD.register((serverWorld, worldChunk) -> consumer.accept(new ServerLevel(serverWorld), new WorldChunk(worldChunk)));
 	}
 }

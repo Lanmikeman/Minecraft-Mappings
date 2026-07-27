@@ -58,6 +58,16 @@ public final class ClassScannerGenerateHolders extends ClassScannerBase {
 			return;
 		}
 
+		// Skip methods with type variables that were not resolved from parent generic classes (e.g. is(T))
+		if (hasUnresolvedTypeVariable(returnType.resolvedTypeName, generics, "") || hasUnresolvedTypeVariable(returnType.minecraftTypeName, generics, "")) {
+			return;
+		}
+		for (final TypeInfo parameter : parameters) {
+			if (hasUnresolvedTypeVariable(parameter.resolvedTypeName, generics, "") || hasUnresolvedTypeVariable(parameter.minecraftTypeName, generics, "")) {
+				return;
+			}
+		}
+
 		final JsonObject nullableObject = findRecord(classInfo, "nullable", isMethod ? minecraftMethodName : classInfo.className, key);
 		final boolean isVoid = returnType.resolvedTypeName.equals("void");
 		final boolean isReturnNullable = nullableObject != null && nullableObject.get("return").getAsBoolean() || returnType.isNullable;
@@ -91,6 +101,11 @@ public final class ClassScannerGenerateHolders extends ClassScannerBase {
 		final String variablesJoined2 = String.join(",", variableList2);
 
 		final String mappedMethodName = isMethod ? mappingsObject == null ? minecraftMethodName : mappingsObject.getAsJsonArray("names").get(0).getAsString() : classInfo.getClassName();
+		// Deduplicate: MethodMaps aliases can map two real methods to the same stable name (e.g. getUseItem + getActiveItem)
+		final String memberKey = mappedMethodName + "(" + parameters.stream().map(p -> p.resolvedTypeName).collect(Collectors.joining(",")) + ")";
+		if (!classInfo.generatedMembers.add(memberKey)) {
+			return;
+		}
 		final boolean writeAbstractBody = !isAbstract || !classInfo.isAbstractMapping;
 		classInfo.stringBuilder.append(String.format(
 				"%s %s%s %s%s %s%s(%s)%s",
@@ -170,6 +185,11 @@ public final class ClassScannerGenerateHolders extends ClassScannerBase {
 		if (mappingsObject != null) {
 			final String unformattedName = mappingsObject.getAsJsonArray("names").get(0).getAsString();
 			final String newName = formatMethodName(isStatic ? unformattedName.toLowerCase(Locale.ENGLISH) : unformattedName);
+			// Deduplicate hidden parent fields (e.g. BlockPos.ZERO and Vec3i.ZERO both become getZeroMapped)
+			final String fieldKey = "get" + newName + "Mapped()";
+			if (!classInfo.generatedMembers.add(fieldKey)) {
+				return;
+			}
 			final String fieldAccess = String.format("%s%s", classInfo.isAbstractMapping ? "" : isStatic ? minecraftClassName + "." : "data.", fieldType.variableName);
 
 			if (!fieldType.isPrimitive) {
@@ -223,8 +243,37 @@ public final class ClassScannerGenerateHolders extends ClassScannerBase {
 	void postScan() {
 	}
 
+
+	private static boolean hasUnresolvedTypeVariable(String typeName, String methodGenerics, String classGenericsWithBounds) {
+		if (typeName == null || typeName.isEmpty()) {
+			return false;
+		}
+		// Match bare type variables like T, E, O, S (single uppercase letter, not part of FQCN)
+		final java.util.regex.Matcher matcher = java.util.regex.Pattern.compile("(?<![\\w.])([A-Z])(?![\\w])").matcher(typeName);
+		while (matcher.find()) {
+			final String var = matcher.group(1);
+			// declared on method: <T extends ...> or <T>
+			if (methodGenerics != null && (methodGenerics.contains("<" + var) || methodGenerics.contains("," + var) || methodGenerics.contains(", " + var))) {
+				continue;
+			}
+			// declared on class: <S extends ...>
+			if (classGenericsWithBounds != null && (classGenericsWithBounds.contains("<" + var) || classGenericsWithBounds.contains("," + var) || classGenericsWithBounds.contains(", " + var))) {
+				continue;
+			}
+			return true;
+		}
+		return false;
+	}
+
 	private JsonObject findRecord(ClassInfo classInfo, String key, @Nullable String minecraftMethodName, String signature) {
-		final JsonArray jsonArray = combinedObject.getAsJsonObject(classInfo.className).getAsJsonArray(key);
+		if (combinedObject == null || !combinedObject.has(classInfo.className)) {
+			return null;
+		}
+		final JsonObject classObject = combinedObject.getAsJsonObject(classInfo.className);
+		if (classObject == null || !classObject.has(key)) {
+			return null;
+		}
+		final JsonArray jsonArray = classObject.getAsJsonArray(key);
 		for (final JsonElement jsonElement : jsonArray) {
 			final JsonObject jsonObject = jsonElement.getAsJsonObject();
 			if (jsonObject.get("signature").getAsString().equals(signature)) {

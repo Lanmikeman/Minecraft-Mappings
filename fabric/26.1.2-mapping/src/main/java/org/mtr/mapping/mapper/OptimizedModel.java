@@ -1,7 +1,7 @@
 package org.mtr.mapping.mapper;
 
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.math.RotationAxis;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
 import org.mtr.mapping.annotation.MappedMethod;
 import org.mtr.mapping.holder.Identifier;
 import org.mtr.mapping.holder.OverlayTexture;
@@ -96,10 +96,10 @@ public final class OptimizedModel extends DummyClass {
 		public void addCube(ModelPartExtension modelPart, double x, double y, double z, boolean flipped, int light) {
 			if (modelPart.modelPart != null) {
 				modelPartConsumers.add(capturingVertexConsumer -> {
-					final MatrixStack matrixStack = new MatrixStack();
+					final PoseStack matrixStack = new PoseStack();
 					matrixStack.translate(x, y, z);
 					if (flipped) {
-						matrixStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(180));
+						matrixStack.multiply(Axis.POSITIVE_Y.rotationDegrees(180));
 					}
 					modelPart.modelPart.render(matrixStack, capturingVertexConsumer, light, OverlayTexture.getDefaultUvMapped());
 				});

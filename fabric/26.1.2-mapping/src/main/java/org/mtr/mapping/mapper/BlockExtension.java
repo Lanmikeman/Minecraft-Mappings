@@ -1,8 +1,8 @@
 package org.mtr.mapping.mapper;
 
-import net.minecraft.state.StateManager;
-import net.minecraft.text.Text;
-import net.minecraft.world.WorldView;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.LevelReader;
 import org.mtr.mapping.annotation.MappedMethod;
 import org.mtr.mapping.holder.*;
 
@@ -18,59 +18,59 @@ public class BlockExtension extends BlockAbstractMapping implements BlockHelper 
 	}
 
 	@MappedMethod
-	public void onBreak2(World world, BlockPos pos, BlockState state, PlayerEntity player) {
+	public void onBreak2(Level world, BlockPos pos, BlockState state, Player player) {
 		super.onBreak(world.data, pos.data, state.data, player.data);
 	}
 
 	@Deprecated
 	@Override
-	public final net.minecraft.block.BlockState onBreak(net.minecraft.world.World world, net.minecraft.util.math.BlockPos pos, net.minecraft.block.BlockState state, net.minecraft.entity.player.PlayerEntity player) {
-		onBreak2(new World(world), new BlockPos(pos), new BlockState(state), new PlayerEntity(player));
+	public final net.minecraft.world.level.block.state.BlockState onBreak(net.minecraft.world.level.Level world, net.minecraft.core.BlockPos pos, net.minecraft.world.level.block.state.BlockState state, net.minecraft.world.entity.player.Player player) {
+		onBreak2(new Level(world), new BlockPos(pos), new BlockState(state), new Player(player));
 		return state;
 	}
 
 	@Nonnull
 	@MappedMethod
-	public ItemStack getPickStack2(BlockView world, BlockPos pos, BlockState state) {
-		return world.data instanceof WorldView ? new ItemStack(super.getPickStack((WorldView) world.data, pos.data, state.data)) : ItemStack.getEmptyMapped();
+	public ItemStack getPickStack2(BlockGetter world, BlockPos pos, BlockState state) {
+		return world.data instanceof LevelReader ? new ItemStack(super.getPickStack((LevelReader) world.data, pos.data, state.data)) : ItemStack.getEmptyMapped();
 	}
 
 	@Nonnull
 	@Deprecated
 	@Override
-	public final net.minecraft.item.ItemStack getPickStack(WorldView world, net.minecraft.util.math.BlockPos pos, net.minecraft.block.BlockState state) {
-		return getPickStack2(new BlockView(world), new BlockPos(pos), new BlockState(state)).data;
+	public final net.minecraft.world.item.ItemStack getPickStack(LevelReader world, net.minecraft.core.BlockPos pos, net.minecraft.world.level.block.state.BlockState state) {
+		return getPickStack2(new BlockGetter(world), new BlockPos(pos), new BlockState(state)).data;
 	}
 
 	@Deprecated
 	@Override
-	protected final void appendProperties(StateManager.Builder<net.minecraft.block.Block, net.minecraft.block.BlockState> builder) {
+	protected final void appendProperties(StateDefinition.Builder<net.minecraft.world.level.block.Block, net.minecraft.world.level.block.state.BlockState> builder) {
 		appendPropertiesHelper(builder);
 	}
 
 	@Deprecated
 	@Override
-	public final void appendTooltip(net.minecraft.item.ItemStack stack, @Nullable net.minecraft.world.BlockView world, List<Text> tooltip, net.minecraft.client.item.TooltipContext options) {
-		appendTooltipHelper(new ItemStack(stack), world == null ? null : new BlockView(world), tooltip, new TooltipContext(options));
+	public final void appendTooltip(net.minecraft.world.item.ItemStack stack, @Nullable net.minecraft.world.level.BlockGetter world, List<Component> tooltip, net.minecraft.world.item.Item$TooltipContext options) {
+		appendTooltipHelper(new ItemStack(stack), world == null ? null : new BlockGetter(world), tooltip, new TooltipContext(options));
 	}
 
 	@MappedMethod
-	public static void scheduleBlockTick(World world, BlockPos pos, Block block, int ticks) {
+	public static void scheduleBlockTick(Level world, BlockPos pos, Block block, int ticks) {
 		world.data.scheduleBlockTick(pos.data, block.data, ticks);
 	}
 
 	@MappedMethod
-	public static boolean hasScheduledBlockTick(World world, BlockPos pos, Block block) {
+	public static boolean hasScheduledBlockTick(Level world, BlockPos pos, Block block) {
 		return world.data.getBlockTickScheduler().isQueued(pos.data, block.data);
 	}
 
 	@MappedMethod
-	public static void scheduleFluidTick(World world, BlockPos pos, Fluid fluid, int ticks) {
+	public static void scheduleFluidTick(Level world, BlockPos pos, Fluid fluid, int ticks) {
 		world.data.scheduleFluidTick(pos.data, fluid.data, ticks);
 	}
 
 	@MappedMethod
-	public static boolean hasScheduledFluidTick(World world, BlockPos pos, Fluid fluid) {
+	public static boolean hasScheduledFluidTick(Level world, BlockPos pos, Fluid fluid) {
 		return world.data.getFluidTickScheduler().isQueued(pos.data, fluid.data);
 	}
 }

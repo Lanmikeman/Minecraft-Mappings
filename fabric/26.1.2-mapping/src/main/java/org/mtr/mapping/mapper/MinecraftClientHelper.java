@@ -1,7 +1,7 @@
 package org.mtr.mapping.mapper;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.world.ClientWorld;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
 import org.mtr.mapping.annotation.MappedMethod;
 import org.mtr.mapping.holder.Entity;
 import org.mtr.mapping.holder.EntityAbstractMapping;
@@ -14,17 +14,17 @@ public final class MinecraftClientHelper extends DummyClass {
 
 	@MappedMethod
 	public static int getRenderDistance() {
-		return MinecraftClient.getInstance().options.getViewDistance().getValue();
+		return Minecraft.getInstance().options.getViewDistance().getValue();
 	}
 
 	@MappedMethod
 	public static File getResourcePackDirectory() {
-		return MinecraftClient.getInstance().getResourcePackDir().toFile();
+		return Minecraft.getInstance().getResourcePackDir().toFile();
 	}
 
 	@MappedMethod
 	public static void getEntities(Consumer<Entity> consumer) {
-		final ClientWorld clientWorld = MinecraftClient.getInstance().world;
+		final ClientLevel clientWorld = Minecraft.getInstance().world;
 		if (clientWorld != null) {
 			clientWorld.getEntities().forEach(entity -> consumer.accept(new Entity(entity)));
 		}
@@ -32,7 +32,7 @@ public final class MinecraftClientHelper extends DummyClass {
 
 	@MappedMethod
 	public static void addEntity(EntityAbstractMapping entity) {
-		final ClientWorld clientWorld = MinecraftClient.getInstance().world;
+		final ClientLevel clientWorld = Minecraft.getInstance().world;
 		if (clientWorld != null) {
 			clientWorld.addEntity(entity);
 		}

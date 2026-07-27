@@ -1,7 +1,7 @@
 package org.mtr.mapping.mapper;
 
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.util.math.MatrixStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.blaze3d.vertex.PoseStack;
 import org.mtr.mapping.annotation.MappedMethod;
 import org.mtr.mapping.tool.DummyInterface;
 
@@ -11,7 +11,7 @@ public interface ModelHelper extends DummyInterface {
 	void render(GraphicsHolder graphicsHolder, int light, int overlay, float red, float green, float blue, float alpha);
 
 	@Deprecated
-	default void render3(MatrixStack matrixStack, VertexConsumer vertexConsumer, int light, int overlay, float red, float green, float blue, float alpha) {
+	default void render3(PoseStack matrixStack, VertexConsumer vertexConsumer, int light, int overlay, float red, float green, float blue, float alpha) {
 		GraphicsHolder.createInstanceSafe(matrixStack, null, graphicsHolder -> {
 			graphicsHolder.vertexConsumer = vertexConsumer;
 			render(graphicsHolder, light, overlay, red, green, blue, alpha);

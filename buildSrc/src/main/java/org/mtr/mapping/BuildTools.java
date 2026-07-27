@@ -36,7 +36,7 @@ public final class BuildTools {
 	private final boolean isCommon;
 
 	private static boolean needsSetup = true;
-	private static final int MAPPINGS_TO_USE = 5; // Fabric 1.20.x
+	private static final int MAPPINGS_TO_USE = 0; // 26.1.2 single-version port (index 0 = only available map)
 
 	public BuildTools(Project project, String generateProperty) throws IOException {
 		path = project.getProjectDir().toPath();

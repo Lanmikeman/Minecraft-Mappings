@@ -6,9 +6,9 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
-import net.minecraft.resource.ResourceManager;
-import net.minecraft.resource.ResourceType;
-import net.minecraft.util.Identifier;
+import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.server.packs.PackType;
+import net.minecraft.resources.Identifier;
 import org.mtr.mapping.annotation.MappedMethod;
 import org.mtr.mapping.holder.ClientWorld;
 import org.mtr.mapping.holder.WorldChunk;
@@ -32,13 +32,13 @@ public class EventRegistryClient extends DummyClass {
 	}
 
 	@MappedMethod
-	public void registerStartWorldTick(Consumer<ClientWorld> consumer) {
-		ClientTickEvents.START_WORLD_TICK.register(clientWorld -> consumer.accept(new ClientWorld(clientWorld)));
+	public void registerStartWorldTick(Consumer<ClientLevel> consumer) {
+		ClientTickEvents.START_WORLD_TICK.register(clientWorld -> consumer.accept(new ClientLevel(clientWorld)));
 	}
 
 	@MappedMethod
-	public void registerEndWorldTick(Consumer<ClientWorld> consumer) {
-		ClientTickEvents.END_WORLD_TICK.register(clientWorld -> consumer.accept(new ClientWorld(clientWorld)));
+	public void registerEndWorldTick(Consumer<ClientLevel> consumer) {
+		ClientTickEvents.END_WORLD_TICK.register(clientWorld -> consumer.accept(new ClientLevel(clientWorld)));
 	}
 
 	@MappedMethod
@@ -52,13 +52,13 @@ public class EventRegistryClient extends DummyClass {
 	}
 
 	@MappedMethod
-	public void registerChunkLoad(BiConsumer<ClientWorld, WorldChunk> consumer) {
-		ClientChunkEvents.CHUNK_LOAD.register((clientWorld, worldChunk) -> consumer.accept(new ClientWorld(clientWorld), new WorldChunk(worldChunk)));
+	public void registerChunkLoad(BiConsumer<ClientLevel, WorldChunk> consumer) {
+		ClientChunkEvents.CHUNK_LOAD.register((clientWorld, worldChunk) -> consumer.accept(new ClientLevel(clientWorld), new WorldChunk(worldChunk)));
 	}
 
 	@MappedMethod
-	public void registerChunkUnload(BiConsumer<ClientWorld, WorldChunk> consumer) {
-		ClientChunkEvents.CHUNK_UNLOAD.register((clientWorld, worldChunk) -> consumer.accept(new ClientWorld(clientWorld), new WorldChunk(worldChunk)));
+	public void registerChunkUnload(BiConsumer<ClientLevel, WorldChunk> consumer) {
+		ClientChunkEvents.CHUNK_UNLOAD.register((clientWorld, worldChunk) -> consumer.accept(new ClientLevel(clientWorld), new WorldChunk(worldChunk)));
 	}
 
 	@MappedMethod
@@ -69,7 +69,7 @@ public class EventRegistryClient extends DummyClass {
 	@MappedMethod
 	public void registerResourceReloadEvent(Runnable runnable) {
 		final Identifier identifier = new Identifier(Integer.toHexString(new Random().nextInt()), "resource");
-		ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES).registerReloadListener(new SimpleSynchronousResourceReloadListener() {
+		ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(new SimpleSynchronousResourceReloadListener() {
 			@Deprecated
 			@Override
 			public final Identifier getFabricId() {

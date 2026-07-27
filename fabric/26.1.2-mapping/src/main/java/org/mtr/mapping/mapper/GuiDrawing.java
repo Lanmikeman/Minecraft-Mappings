@@ -2,7 +2,7 @@ package org.mtr.mapping.mapper;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.render.*;
+import net.minecraft.client.renderer.*;
 import org.joml.Matrix4f;
 import org.mtr.mapping.annotation.MappedMethod;
 import org.mtr.mapping.holder.Identifier;
@@ -25,7 +25,7 @@ public final class GuiDrawing extends DummyClass {
 	@MappedMethod
 	public void beginDrawingRectangle() {
 		matrix = graphicsHolder.matrixStack == null ? null : graphicsHolder.matrixStack.peek().getPositionMatrix();
-		vertexConsumer = graphicsHolder.vertexConsumerProvider == null ? null : graphicsHolder.vertexConsumerProvider.getBuffer(net.minecraft.client.render.RenderLayer.getGui());
+		vertexConsumer = graphicsHolder.vertexConsumerProvider == null ? null : graphicsHolder.vertexConsumerProvider.getBuffer(net.minecraft.client.renderer.RenderLayer.getGui());
 		drawContext = graphicsHolder.drawContext;
 	}
 
@@ -63,11 +63,11 @@ public final class GuiDrawing extends DummyClass {
 	@MappedMethod
 	public void beginDrawingTexture(Identifier identifier) {
 		matrix = graphicsHolder.matrixStack == null ? null : graphicsHolder.matrixStack.peek().getPositionMatrix();
-		bufferBuilder = Tessellator.getInstance().getBuffer();
+		bufferBuilder = Tesselator.getInstance().getBuffer();
 		RenderSystem.setShaderTexture(0, identifier.data);
 		RenderSystem.enableDepthTest();
 		RenderSystem.setShader(GameRenderer::getPositionTexProgram);
-		bufferBuilder.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE);
+		bufferBuilder.begin(VertexFormat.DrawMode.QUADS, DefaultVertexFormat.POSITION_TEXTURE);
 	}
 
 	@MappedMethod

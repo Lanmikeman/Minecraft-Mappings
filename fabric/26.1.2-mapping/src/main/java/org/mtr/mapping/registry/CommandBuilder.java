@@ -5,9 +5,9 @@ import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
-import net.minecraft.server.command.CommandManager;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.Text;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.network.chat.Component;
 import org.mtr.mapping.annotation.MappedMethod;
 import org.mtr.mapping.holder.MinecraftServer;
 import org.mtr.mapping.holder.ServerPlayerEntity;
@@ -18,7 +18,7 @@ import javax.annotation.Nullable;
 import java.util.function.Consumer;
 import java.util.function.ToIntFunction;
 
-public final class CommandBuilder<T extends ArgumentBuilder<ServerCommandSource, T>> extends DummyClass {
+public final class CommandBuilder<T extends ArgumentBuilder<CommandSourceStack, T>> extends DummyClass {
 
 	T argumentBuilder;
 
@@ -33,14 +33,14 @@ public final class CommandBuilder<T extends ArgumentBuilder<ServerCommandSource,
 
 	@MappedMethod
 	public <U> void then(String argumentName, ArgumentType<U> argumentType, Consumer<CommandBuilder<?>> consumer) {
-		final CommandBuilder<RequiredArgumentBuilder<ServerCommandSource, U>> commandBuilder = new CommandBuilder<>(CommandManager.argument(argumentName, argumentType));
+		final CommandBuilder<RequiredArgumentBuilder<CommandSourceStack, U>> commandBuilder = new CommandBuilder<>(Commands.argument(argumentName, argumentType));
 		consumer.accept(commandBuilder);
 		argumentBuilder = argumentBuilder.then(commandBuilder.argumentBuilder);
 	}
 
 	@MappedMethod
 	public void then(String commandName, Consumer<CommandBuilder<?>> consumer) {
-		final CommandBuilder<LiteralArgumentBuilder<ServerCommandSource>> commandBuilder = new CommandBuilder<>(CommandManager.literal(commandName));
+		final CommandBuilder<LiteralArgumentBuilder<CommandSourceStack>> commandBuilder = new CommandBuilder<>(Commands.literal(commandName));
 		consumer.accept(commandBuilder);
 		argumentBuilder = argumentBuilder.then(commandBuilder.argumentBuilder);
 	}
@@ -52,9 +52,9 @@ public final class CommandBuilder<T extends ArgumentBuilder<ServerCommandSource,
 
 	public static class ContextHandler {
 
-		private final CommandContext<ServerCommandSource> context;
+		private final CommandContext<CommandSourceStack> context;
 
-		private ContextHandler(CommandContext<ServerCommandSource> context) {
+		private ContextHandler(CommandContext<CommandSourceStack> context) {
 			this.context = context;
 		}
 
@@ -90,12 +90,12 @@ public final class CommandBuilder<T extends ArgumentBuilder<ServerCommandSource,
 
 		@MappedMethod
 		public void sendSuccess(String message, boolean broadcastToOps, Object... translatableArguments) {
-			context.getSource().sendFeedback(() -> Text.translatable(message, translatableArguments), broadcastToOps);
+			context.getSource().sendFeedback(() -> Component.translatable(message, translatableArguments), broadcastToOps);
 		}
 
 		@MappedMethod
 		public void sendFailure(String message, Object... translatableArguments) {
-			context.getSource().sendError(Text.translatable(message, translatableArguments));
+			context.getSource().sendError(Component.translatable(message, translatableArguments));
 		}
 
 		@MappedMethod
@@ -104,15 +104,15 @@ public final class CommandBuilder<T extends ArgumentBuilder<ServerCommandSource,
 		}
 
 		@MappedMethod
-		public World getWorld() {
-			return new World(context.getSource().getWorld());
+		public Level getWorld() {
+			return new Level(context.getSource().getWorld());
 		}
 
 		@MappedMethod
 		@Nullable
-		public ServerPlayerEntity getServerPlayer() {
-			final net.minecraft.server.network.ServerPlayerEntity serverPlayerEntity = context.getSource().getPlayer();
-			return serverPlayerEntity == null ? null : new ServerPlayerEntity(serverPlayerEntity);
+		public ServerPlayer getServerPlayer() {
+			final net.minecraft.server.level.ServerPlayer serverPlayerEntity = context.getSource().getPlayer();
+			return serverPlayerEntity == null ? null : new ServerPlayer(serverPlayerEntity);
 		}
 	}
 }

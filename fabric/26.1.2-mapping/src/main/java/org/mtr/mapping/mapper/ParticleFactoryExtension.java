@@ -1,7 +1,7 @@
 package org.mtr.mapping.mapper;
 
 import net.minecraft.client.particle.ParticleFactory;
-import net.minecraft.particle.DefaultParticleType;
+import net.minecraft.core.particles.SimpleParticleType;
 import org.mtr.mapping.annotation.MappedMethod;
 import org.mtr.mapping.holder.ClientWorld;
 import org.mtr.mapping.holder.Particle;
@@ -9,32 +9,32 @@ import org.mtr.mapping.holder.SpriteBillboardParticle;
 import org.mtr.mapping.holder.SpriteProvider;
 import org.mtr.mapping.tool.DummyClass;
 
-public abstract class ParticleFactoryExtension implements ParticleFactory<DefaultParticleType> {
+public abstract class ParticleFactoryExtension implements ParticleFactory<SimpleParticleType> {
 
 	private final CreateParticle createParticle;
 	private final CreateSpriteBillboardParticle createSpriteBillboardParticle;
-	private final SpriteProvider spriteProvider;
+	private final SpriteSet spriteProvider;
 
 	@MappedMethod
-	public ParticleFactoryExtension(CreateParticle createParticle, SpriteProvider spriteProvider) {
+	public ParticleFactoryExtension(CreateParticle createParticle, SpriteSet spriteProvider) {
 		this.createParticle = createParticle;
 		createSpriteBillboardParticle = null;
 		this.spriteProvider = spriteProvider;
 	}
 
 	@MappedMethod
-	public ParticleFactoryExtension(CreateSpriteBillboardParticle createSpriteBillboardParticle, SpriteProvider spriteProvider) {
+	public ParticleFactoryExtension(CreateSpriteBillboardParticle createSpriteBillboardParticle, SpriteSet spriteProvider) {
 		createParticle = null;
 		this.createSpriteBillboardParticle = createSpriteBillboardParticle;
 		this.spriteProvider = spriteProvider;
 	}
 
 	@Deprecated
-	public final net.minecraft.client.particle.Particle createParticle(DefaultParticleType defaultParticleType, net.minecraft.client.world.ClientWorld clientWorld, double x, double y, double z, double velocityX, double velocityY, double velocityZ) {
+	public final net.minecraft.client.particle.Particle createParticle(SimpleParticleType defaultParticleType, net.minecraft.client.multiplayer.ClientLevel clientWorld, double x, double y, double z, double velocityX, double velocityY, double velocityZ) {
 		if (createParticle != null) {
-			return createParticle.create(new ClientWorld(clientWorld), x, y, z, velocityX, velocityY, velocityZ).data;
+			return createParticle.create(new ClientLevel(clientWorld), x, y, z, velocityX, velocityY, velocityZ).data;
 		} else if (createSpriteBillboardParticle != null) {
-			final SpriteBillboardParticle spriteBillboardParticle = createSpriteBillboardParticle.create(new ClientWorld(clientWorld), x, y, z, velocityX, velocityY, velocityZ);
+			final SpriteBillboardParticle spriteBillboardParticle = createSpriteBillboardParticle.create(new ClientLevel(clientWorld), x, y, z, velocityX, velocityY, velocityZ);
 			spriteBillboardParticle.data.setSprite(spriteProvider.data);
 			return spriteBillboardParticle.data;
 		} else {
@@ -47,12 +47,12 @@ public abstract class ParticleFactoryExtension implements ParticleFactory<Defaul
 	@FunctionalInterface
 	public interface CreateParticle {
 		@MappedMethod
-		Particle create(ClientWorld clientWorld, double x, double y, double z, double velocityX, double velocityY, double velocityZ);
+		Particle create(ClientLevel clientWorld, double x, double y, double z, double velocityX, double velocityY, double velocityZ);
 	}
 
 	@FunctionalInterface
 	public interface CreateSpriteBillboardParticle {
 		@MappedMethod
-		SpriteBillboardParticle create(ClientWorld clientWorld, double x, double y, double z, double velocityX, double velocityY, double velocityZ);
+		SpriteBillboardParticle create(ClientLevel clientWorld, double x, double y, double z, double velocityX, double velocityY, double velocityZ);
 	}
 }

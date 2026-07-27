@@ -1,13 +1,13 @@
 package org.mtr.mapping.mapper;
 
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.entity.EntityRendererFactory;
-import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import com.mojang.blaze3d.vertex.PoseStack;
 import org.mtr.mapping.annotation.MappedMethod;
 import org.mtr.mapping.holder.Frustum;
 import org.mtr.mapping.holder.Identifier;
 
-public abstract class EntityRenderer<T extends EntityExtension> extends net.minecraft.client.render.entity.EntityRenderer<T> {
+public abstract class EntityRenderer<T extends EntityExtension> extends net.minecraft.client.renderer.entity.EntityRenderer<T> {
 
 	@MappedMethod
 	public EntityRenderer(Argument argument) {
@@ -16,7 +16,7 @@ public abstract class EntityRenderer<T extends EntityExtension> extends net.mine
 
 	@Deprecated
 	@Override
-	public final void render(T entity, float yaw, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light) {
+	public final void render(T entity, float yaw, float tickDelta, PoseStack matrices, MultiBufferSource vertexConsumers, int light) {
 		GraphicsHolder.createInstanceSafe(matrices, vertexConsumers, graphicsHolder -> render(entity, yaw, tickDelta, graphicsHolder, light));
 	}
 
@@ -25,7 +25,7 @@ public abstract class EntityRenderer<T extends EntityExtension> extends net.mine
 
 	@Deprecated
 	@Override
-	public final net.minecraft.util.Identifier getTexture(T entity) {
+	public final net.minecraft.resources.Identifier getTexture(T entity) {
 		return getTexture2(entity).data;
 	}
 
@@ -34,7 +34,7 @@ public abstract class EntityRenderer<T extends EntityExtension> extends net.mine
 
 	@Deprecated
 	@Override
-	public final boolean shouldRender(T entity, net.minecraft.client.render.Frustum frustum, double x, double y, double z) {
+	public final boolean shouldRender(T entity, net.minecraft.client.renderer.culling.Frustum frustum, double x, double y, double z) {
 		return shouldRender2(entity, new Frustum(frustum), x, y, z);
 	}
 
@@ -46,9 +46,9 @@ public abstract class EntityRenderer<T extends EntityExtension> extends net.mine
 	@Deprecated
 	public static final class Argument {
 
-		private final EntityRendererFactory.Context data;
+		private final EntityRendererProvider.Context data;
 
-		public Argument(EntityRendererFactory.Context data) {
+		public Argument(EntityRendererProvider.Context data) {
 			this.data = data;
 		}
 	}

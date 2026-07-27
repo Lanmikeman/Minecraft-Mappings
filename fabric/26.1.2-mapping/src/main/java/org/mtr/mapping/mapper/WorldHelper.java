@@ -9,17 +9,17 @@ import org.mtr.mapping.tool.DummyClass;
 public final class WorldHelper extends DummyClass {
 
 	@MappedMethod
-	public static long getTimeOfDay(ServerWorld serverWorld) {
+	public static long getTimeOfDay(ServerLevel serverWorld) {
 		return serverWorld.data.getTimeOfDay();
 	}
 
 	@MappedMethod
-	public static long getTimeOfDay(ClientWorld clientWorld) {
+	public static long getTimeOfDay(ClientLevel clientWorld) {
 		return clientWorld.data.getTimeOfDay();
 	}
 
 	@MappedMethod
-	public static long getTimeOfDay(World world) {
+	public static long getTimeOfDay(Level world) {
 		return world.data.getTimeOfDay();
 	}
 }

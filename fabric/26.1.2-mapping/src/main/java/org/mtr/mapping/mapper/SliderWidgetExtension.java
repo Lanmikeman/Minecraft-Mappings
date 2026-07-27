@@ -19,8 +19,8 @@ public abstract class SliderWidgetExtension extends SliderWidgetAbstractMapping 
 	}
 
 	@MappedMethod
-	public SliderWidgetExtension(int x, int y, int width, int height, MutableText message) {
-		super(x, y, width, height, new Text(message.data), 0);
+	public SliderWidgetExtension(int x, int y, int width, int height, MutableComponent message) {
+		super(x, y, width, height, new Component(message.data), 0);
 	}
 
 	@MappedMethod

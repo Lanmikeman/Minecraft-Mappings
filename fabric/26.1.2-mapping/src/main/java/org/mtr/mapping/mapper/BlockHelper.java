@@ -1,11 +1,11 @@
 package org.mtr.mapping.mapper;
 
-import net.minecraft.block.AbstractBlock;
-import net.minecraft.block.Block;
-import net.minecraft.block.piston.PistonBehavior;
-import net.minecraft.state.StateManager;
-import net.minecraft.state.property.Property;
-import net.minecraft.text.Text;
+import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.material.PushReaction;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.Property;
+import net.minecraft.network.chat.Component;
 import org.mtr.mapping.annotation.MappedMethod;
 import org.mtr.mapping.holder.*;
 import org.mtr.mapping.tool.DummyInterface;
@@ -23,7 +23,7 @@ public interface BlockHelper extends DummyInterface {
 	}
 
 	@Deprecated
-	default void appendPropertiesHelper(StateManager.Builder<Block, net.minecraft.block.BlockState> builder) {
+	default void appendPropertiesHelper(StateDefinition.Builder<Block, net.minecraft.world.level.block.state.BlockState> builder) {
 		final List<HolderBase<?>> properties = new ArrayList<>();
 		addBlockProperties(properties);
 
@@ -40,12 +40,12 @@ public interface BlockHelper extends DummyInterface {
 	}
 
 	@MappedMethod
-	default void addTooltips(ItemStack stack, @Nullable BlockView world, List<MutableText> tooltip, TooltipContext options) {
+	default void addTooltips(ItemStack stack, @Nullable BlockGetter world, List<MutableComponent> tooltip, TooltipContext options) {
 	}
 
 	@Deprecated
-	default void appendTooltipHelper(ItemStack stack, @Nullable BlockView world, List<Text> tooltipList, TooltipContext options) {
-		final List<MutableText> newTooltipList = new ArrayList<>();
+	default void appendTooltipHelper(ItemStack stack, @Nullable BlockGetter world, List<Component> tooltipList, TooltipContext options) {
+		final List<MutableComponent> newTooltipList = new ArrayList<>();
 		addTooltips(stack, world, newTooltipList, options);
 		newTooltipList.forEach(mutableText -> tooltipList.add(mutableText.data));
 	}
@@ -57,7 +57,7 @@ public interface BlockHelper extends DummyInterface {
 
 	@MappedMethod
 	static BlockSettings createBlockSettings(boolean blockPiston, boolean forceSolid) {
-		final AbstractBlock.Settings settings = AbstractBlock.Settings.create().pistonBehavior(blockPiston ? PistonBehavior.BLOCK : PistonBehavior.NORMAL);
+		final BlockBehaviour.Settings settings = BlockBehaviour.Settings.create().pistonBehavior(blockPiston ? PushReaction.BLOCK : PushReaction.NORMAL);
 		return new BlockSettings(forceSolid ? settings.solid() : settings);
 	}
 
@@ -70,7 +70,7 @@ public interface BlockHelper extends DummyInterface {
 	static VoxelShape shapeUnion(VoxelShape voxelShape, VoxelShape... voxelShapes) {
 		VoxelShape result = voxelShape;
 		for (final VoxelShape additionalShape : voxelShapes) {
-			result = VoxelShapes.union(result, additionalShape);
+			result = Shapes.union(result, additionalShape);
 		}
 		return result;
 	}

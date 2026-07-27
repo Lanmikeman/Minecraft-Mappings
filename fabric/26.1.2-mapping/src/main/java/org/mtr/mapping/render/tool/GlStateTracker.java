@@ -1,7 +1,7 @@
 package org.mtr.mapping.render.tool;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.client.gl.ShaderProgram;
+import com.mojang.blaze3d.shaders.ShaderProgram;
 import org.lwjgl.opengl.GL33;
 import org.mtr.mapping.tool.DummyClass;
 

@@ -1,6 +1,6 @@
 package org.mtr.mapping.mapper;
 
-import net.minecraft.datafixer.DataFixTypes;
+import net.minecraft.util.datafix.DataFixTypes;
 import org.mtr.mapping.annotation.MappedMethod;
 import org.mtr.mapping.holder.CompoundTag;
 import org.mtr.mapping.holder.PersistentStateAbstractMapping;
@@ -19,7 +19,7 @@ public abstract class PersistenceStateExtension extends PersistentStateAbstractM
 	public abstract void readNbt(CompoundTag tag);
 
 	@MappedMethod
-	public static PersistenceStateExtension register(ServerWorld serverWorld, Supplier<PersistenceStateExtension> supplier, String modId) {
+	public static PersistenceStateExtension register(ServerLevel serverWorld, Supplier<PersistenceStateExtension> supplier, String modId) {
 		return serverWorld.data.getPersistentStateManager().getOrCreate(new Type<>(supplier, compoundTag -> {
 			final PersistenceStateExtension persistenceStateExtension = supplier.get();
 			persistenceStateExtension.readNbt(new CompoundTag(compoundTag));

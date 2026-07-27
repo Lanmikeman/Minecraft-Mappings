@@ -21,8 +21,8 @@ public class CheckboxWidgetExtension extends CheckboxWidgetAbstractMapping {
 	}
 
 	@MappedMethod
-	public CheckboxWidgetExtension(int x, int y, int width, int height, MutableText message, boolean showMessage, Consumer<Boolean> onPress) {
-		super(x, y, new Text((showMessage ? message.data : net.minecraft.text.Text.empty())), new TextRenderer(MinecraftClient.getInstance().data.textRenderer), false, Callback.EMPTY);
+	public CheckboxWidgetExtension(int x, int y, int width, int height, MutableComponent message, boolean showMessage, Consumer<Boolean> onPress) {
+		super(x, y, new Component((showMessage ? message.data : net.minecraft.text.Text.empty())), new Font(Minecraft.getInstance().data.textRenderer), false, Callback.EMPTY);
 		this.width = width;
 		this.height = height;
 		this.onPress = onPress;

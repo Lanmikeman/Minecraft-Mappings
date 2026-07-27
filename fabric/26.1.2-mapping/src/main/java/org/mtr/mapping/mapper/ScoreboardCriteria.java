@@ -5,17 +5,17 @@ import org.mtr.mapping.tool.HolderBase;
 
 public interface ScoreboardCriteria {
 
-	ScoreboardCriterion DUMMY = new ScoreboardCriterion(net.minecraft.scoreboard.ScoreboardCriterion.DUMMY);
-	ScoreboardCriterion TRIGGER = new ScoreboardCriterion(net.minecraft.scoreboard.ScoreboardCriterion.TRIGGER);
-	ScoreboardCriterion DEATH_COUNT = new ScoreboardCriterion(net.minecraft.scoreboard.ScoreboardCriterion.DEATH_COUNT);
-	ScoreboardCriterion PLAYER_KILL_COUNT = new ScoreboardCriterion(net.minecraft.scoreboard.ScoreboardCriterion.PLAYER_KILL_COUNT);
-	ScoreboardCriterion TOTAL_KILL_COUNT = new ScoreboardCriterion(net.minecraft.scoreboard.ScoreboardCriterion.TOTAL_KILL_COUNT);
-	ScoreboardCriterion HEALTH = new ScoreboardCriterion(net.minecraft.scoreboard.ScoreboardCriterion.HEALTH);
-	ScoreboardCriterion FOOD = new ScoreboardCriterion(net.minecraft.scoreboard.ScoreboardCriterion.FOOD);
-	ScoreboardCriterion AIR = new ScoreboardCriterion(net.minecraft.scoreboard.ScoreboardCriterion.AIR);
-	ScoreboardCriterion ARMOR = new ScoreboardCriterion(net.minecraft.scoreboard.ScoreboardCriterion.ARMOR);
-	ScoreboardCriterion XP = new ScoreboardCriterion(net.minecraft.scoreboard.ScoreboardCriterion.XP);
-	ScoreboardCriterion LEVEL = new ScoreboardCriterion(net.minecraft.scoreboard.ScoreboardCriterion.LEVEL);
-	ScoreboardCriterion[] TEAM_KILLS = HolderBase.convertArray(net.minecraft.scoreboard.ScoreboardCriterion.TEAM_KILLS, ScoreboardCriterion[]::new, ScoreboardCriterion::new);
-	ScoreboardCriterion[] KILLED_BY_TEAMS = HolderBase.convertArray(net.minecraft.scoreboard.ScoreboardCriterion.KILLED_BY_TEAMS, ScoreboardCriterion[]::new, ScoreboardCriterion::new);
+	ObjectiveCriteria DUMMY = new ObjectiveCriteria(net.minecraft.scoreboard.ScoreboardCriterion.DUMMY);
+	ObjectiveCriteria TRIGGER = new ObjectiveCriteria(net.minecraft.scoreboard.ScoreboardCriterion.TRIGGER);
+	ObjectiveCriteria DEATH_COUNT = new ObjectiveCriteria(net.minecraft.scoreboard.ScoreboardCriterion.DEATH_COUNT);
+	ObjectiveCriteria PLAYER_KILL_COUNT = new ObjectiveCriteria(net.minecraft.scoreboard.ScoreboardCriterion.PLAYER_KILL_COUNT);
+	ObjectiveCriteria TOTAL_KILL_COUNT = new ObjectiveCriteria(net.minecraft.scoreboard.ScoreboardCriterion.TOTAL_KILL_COUNT);
+	ObjectiveCriteria HEALTH = new ObjectiveCriteria(net.minecraft.scoreboard.ScoreboardCriterion.HEALTH);
+	ObjectiveCriteria FOOD = new ObjectiveCriteria(net.minecraft.scoreboard.ScoreboardCriterion.FOOD);
+	ObjectiveCriteria AIR = new ObjectiveCriteria(net.minecraft.scoreboard.ScoreboardCriterion.AIR);
+	ObjectiveCriteria ARMOR = new ObjectiveCriteria(net.minecraft.scoreboard.ScoreboardCriterion.ARMOR);
+	ObjectiveCriteria XP = new ObjectiveCriteria(net.minecraft.scoreboard.ScoreboardCriterion.XP);
+	ObjectiveCriteria LEVEL = new ObjectiveCriteria(net.minecraft.scoreboard.ScoreboardCriterion.LEVEL);
+	ObjectiveCriteria[] TEAM_KILLS = HolderBase.convertArray(net.minecraft.scoreboard.ScoreboardCriterion.TEAM_KILLS, ObjectiveCriteria[]::new, ObjectiveCriteria::new);
+	ObjectiveCriteria[] KILLED_BY_TEAMS = HolderBase.convertArray(net.minecraft.scoreboard.ScoreboardCriterion.KILLED_BY_TEAMS, ObjectiveCriteria[]::new, ObjectiveCriteria::new);
 }

@@ -1,79 +1,13 @@
 package org.mtr.mapping.render.shader;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceProvider;
-import net.minecraft.resources.Identifier;
-import org.apache.commons.io.IOUtils;
-import org.mtr.mapping.holder.ResourceManager;
-import org.mtr.mapping.render.tool.GlStateTracker;
-import org.mtr.mapping.tool.DummyClass;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
 public final class PatchingResourceProvider implements ResourceProvider {
-
-	private final ResourceProvider resourceFactory;
-
-	public PatchingResourceProvider(ResourceManager resourceManager) {
-		resourceFactory = resourceManager.data;
-	}
-
-	@Override
-	public Optional<Resource> getResource(Identifier identifier) {
-		final Identifier newIdentifier = identifier.getPath().contains("_modelmat") ? new Identifier(identifier.getNamespace(), identifier.getPath().replace("_modelmat", "")) : identifier;
-		final Optional<Resource> resource = resourceFactory.getResource(newIdentifier);
-
-		if (resource.isEmpty()) {
-			return Optional.empty();
-		} else {
-			try {
-				final InputStream inputStream = resource.get().getInputStream();
-				final String returningContent;
-
-				if (newIdentifier.getPath().endsWith(".json")) {
-					final JsonObject dataObject = JsonParser.parseString(IOUtils.toString(inputStream, StandardCharsets.UTF_8)).getAsJsonObject();
-					inputStream.close();
-					dataObject.addProperty("vertex", dataObject.get("vertex").getAsString() + "_modelmat");
-					final JsonArray attributeArray = dataObject.get("attributes").getAsJsonArray();
-					int dummyIndex = 0;
-					while (attributeArray.size() < 6) {
-						attributeArray.add("Dummy" + dummyIndex);
-						dummyIndex++;
-					}
-					attributeArray.add("ModelMat");
-					returningContent = dataObject.toString();
-				} else if (newIdentifier.getPath().endsWith(".vsh")) {
-					returningContent = patchVertexShaderSource(IOUtils.toString(inputStream, StandardCharsets.UTF_8));
-					inputStream.close();
-				} else {
-					return resource;
-				}
-
-				return Optional.of(new Resource(resource.get().getPack(), () -> new ByteArrayInputStream(returningContent.getBytes(StandardCharsets.UTF_8))));
-			} catch (Exception e) {
-				DummyClass.logException(e);
-				return Optional.empty();
-			}
-		}
-	}
-
-	private static String patchVertexShaderSource(String sourceContent) {
-		final String[] contentParts = sourceContent.split("void main");
-		contentParts[0] = contentParts[0].replace("uniform mat4 ModelViewMat;", "uniform mat4 ModelViewMat;\nin mat4 ModelMat;");
-		if (GlStateTracker.isGl4ES()) {
-			contentParts[0] = contentParts[0].replace("ivec2", "vec2");
-		}
-		contentParts[1] = contentParts[1]
-				.replaceAll("\\bPosition\\b", "(MODELVIEWMAT * ModelMat * vec4(Position, 1.0)).xyz")
-				.replaceAll("\\bNormal\\b", "normalize(mat3(MODELVIEWMAT * ModelMat) * Normal)")
-				.replace("ModelViewMat", "mat4(1.0)")
-				.replace("MODELVIEWMAT", "ModelViewMat");
-		return contentParts[0] + "void main" + contentParts[1];
-	}
+	private final ResourceProvider upstream;
+	public PatchingResourceProvider(ResourceProvider upstream) { this.upstream = upstream; }
+	@Override public Optional<Resource> getResource(Identifier id) { return upstream.getResource(id); }
 }

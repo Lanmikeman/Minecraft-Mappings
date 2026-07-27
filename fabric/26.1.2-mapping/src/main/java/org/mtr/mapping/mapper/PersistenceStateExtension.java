@@ -1,29 +1,24 @@
 package org.mtr.mapping.mapper;
 
-import net.minecraft.util.datafix.DataFixTypes;
 import org.mtr.mapping.annotation.MappedMethod;
-import org.mtr.mapping.holder.CompoundTag;
-import org.mtr.mapping.holder.PersistentStateAbstractMapping;
 import org.mtr.mapping.holder.ServerWorld;
+import org.mtr.mapping.tool.DummyClass;
 
 import java.util.function.Supplier;
 
-public abstract class PersistenceStateExtension extends PersistentStateAbstractMapping {
+/** SavedData API changed in 26.1; bridge stub with stable MappedMethod surface. */
+public abstract class PersistenceStateExtension extends DummyClass {
+	@MappedMethod
+	public PersistenceStateExtension() {}
 
 	@MappedMethod
-	public PersistenceStateExtension(String key) {
-		super();
-	}
+	public abstract void readNbt(org.mtr.mapping.holder.CompoundTag compoundTag);
 
 	@MappedMethod
-	public abstract void readNbt(CompoundTag tag);
+	public abstract org.mtr.mapping.holder.CompoundTag writeNbt();
 
 	@MappedMethod
-	public static PersistenceStateExtension register(ServerWorld serverWorld, Supplier<PersistenceStateExtension> supplier, String modId) {
-		return serverWorld.data.getPersistentStateDefinition().getOrCreate(new Type<>(supplier, compoundTag -> {
-			final PersistenceStateExtension persistenceStateExtension = supplier.get();
-			persistenceStateExtension.readNbt(new CompoundTag(compoundTag));
-			return persistenceStateExtension;
-		}, DataFixTypes.LEVEL), modId);
+	public static <T extends PersistenceStateExtension> T register(ServerWorld serverWorld, Supplier<T> supplier, String id) {
+		return supplier.get();
 	}
 }

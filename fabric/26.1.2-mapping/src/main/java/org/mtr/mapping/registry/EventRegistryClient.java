@@ -3,12 +3,12 @@ package org.mtr.mapping.registry;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientChunkEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
-import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
+import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
-import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.server.packs.PackType;
 import net.minecraft.resources.Identifier;
+import net.minecraft.server.packs.PackType;
+import net.minecraft.server.packs.resources.ResourceManager;
 import org.mtr.mapping.annotation.MappedMethod;
 import org.mtr.mapping.holder.ClientWorld;
 import org.mtr.mapping.holder.WorldChunk;
@@ -33,12 +33,12 @@ public class EventRegistryClient extends DummyClass {
 
 	@MappedMethod
 	public void registerStartWorldTick(Consumer<ClientWorld> consumer) {
-		ClientTickEvents.START_WORLD_TICK.register(clientWorld -> consumer.accept(new ClientWorld(clientWorld)));
+		// TODO 26.1: START_WORLD_TICK renamed/removed
 	}
 
 	@MappedMethod
 	public void registerEndWorldTick(Consumer<ClientWorld> consumer) {
-		ClientTickEvents.END_WORLD_TICK.register(clientWorld -> consumer.accept(new ClientWorld(clientWorld)));
+		// TODO 26.1: END_WORLD_TICK renamed/removed
 	}
 
 	@MappedMethod
@@ -63,22 +63,23 @@ public class EventRegistryClient extends DummyClass {
 
 	@MappedMethod
 	public void registerGuiRendering(Consumer<GraphicsHolder> consumer) {
-		HudRenderCallback.EVENT.register((drawContext, tickDelta) -> GraphicsHolder.createInstanceSafe(drawContext, consumer));
+		final Identifier id = Identifier.fromNamespaceAndPath("mtr_mapping", "gui_rendering_" + Integer.toHexString(new Random().nextInt()));
+		HudElementRegistry.addLast(id, (context, tickCounter) -> GraphicsHolder.createInstanceSafe(context, consumer));
 	}
 
 	@MappedMethod
 	public void registerResourceReloadEvent(Runnable runnable) {
-		final Identifier identifier = new Identifier(Integer.toHexString(new Random().nextInt()), "resource");
-		ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES).registerReloadListener(new SimpleSynchronousResourceReloadListener() {
+		final Identifier identifier = Identifier.fromNamespaceAndPath(Integer.toHexString(new Random().nextInt()), "resource");
+		ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(new SimpleSynchronousResourceReloadListener() {
 			@Deprecated
 			@Override
-			public final Identifier getFabricId() {
+			public Identifier getFabricId() {
 				return identifier;
 			}
 
 			@Deprecated
 			@Override
-			public final void reload(ResourceManager manager) {
+			public void onResourceManagerReload(ResourceManager manager) {
 				runnable.run();
 			}
 		});

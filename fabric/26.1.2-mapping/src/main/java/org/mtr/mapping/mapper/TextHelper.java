@@ -11,12 +11,12 @@ public final class TextHelper extends DummyClass {
 
 	@MappedMethod
 	public static MutableText translatable(String key, Object... arguments) {
-		return new MutableText(Text.translatable(key, arguments));
+		return new MutableText(Component.translatable(key, arguments));
 	}
 
 	@MappedMethod
 	public static MutableText literal(String key) {
-		return new MutableText(Text.literal(key));
+		return new MutableText(Component.literal(key));
 	}
 
 	@MappedMethod
@@ -26,7 +26,7 @@ public final class TextHelper extends DummyClass {
 
 	@MappedMethod
 	public static OrderedText mutableTextToOrderedText(MutableText mutableText) {
-		return new OrderedText(mutableText.data.asOrderedText());
+		return new OrderedText(mutableText.data.getVisualOrderText());
 	}
 
 	@MappedMethod

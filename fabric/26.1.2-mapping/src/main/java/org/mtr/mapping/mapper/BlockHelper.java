@@ -1,77 +1,39 @@
 package org.mtr.mapping.mapper;
 
-import net.minecraft.world.level.block.state.BlockBehaviour;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.material.PushReaction;
-import net.minecraft.world.level.block.state.StateDefinition;
-import net.minecraft.world.level.block.state.properties.Property;
-import net.minecraft.network.chat.Component;
 import org.mtr.mapping.annotation.MappedMethod;
 import org.mtr.mapping.holder.*;
-import org.mtr.mapping.tool.DummyInterface;
-import org.mtr.mapping.tool.HolderBase;
+import org.mtr.mapping.tool.DummyClass;
 
-import javax.annotation.Nullable;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.function.ToIntFunction;
+import java.util.function.Consumer;
 
-public interface BlockHelper extends DummyInterface {
+public final class BlockHelper extends DummyClass {
 
 	@MappedMethod
-	default void addBlockProperties(List<HolderBase<?>> properties) {
+	public static void addBlockTooltip(List<org.mtr.mapping.holder.Text> tooltipList, Consumer<List<MutableText>> consumer) {
+		final java.util.ArrayList<MutableText> newTooltipList = new java.util.ArrayList<>();
+		consumer.accept(newTooltipList);
+		newTooltipList.forEach(mutableText -> tooltipList.add(new Text(mutableText.data)));
 	}
 
-	@Deprecated
-	default void appendPropertiesHelper(StateDefinition.Builder<Block, net.minecraft.world.level.block.state.BlockState> builder) {
-		final List<HolderBase<?>> properties = new ArrayList<>();
-		addBlockProperties(properties);
+	@MappedMethod
+	public static BlockSettings setLuminance(BlockSettings blockSettings, java.util.function.ToIntFunction<BlockState> luminanceFunction) {
+		return new BlockSettings(blockSettings.data.lightLevel(state -> luminanceFunction.applyAsInt(new BlockState(state))));
+	}
 
-		if (!properties.isEmpty()) {
-			final Property<?>[] newProperties = new Property[properties.size()];
-			for (int i = 0; i < properties.size(); i++) {
-				final Object data = properties.get(i).data;
-				if (data instanceof Property) {
-					newProperties[i] = (Property<?>) data;
-				}
+	@MappedMethod
+	public static VoxelShape union(VoxelShape... shapes) {
+		net.minecraft.world.phys.shapes.VoxelShape result = net.minecraft.world.phys.shapes.Shapes.empty();
+		for (final VoxelShape shape : shapes) {
+			if (shape != null && shape.data != null) {
+				result = net.minecraft.world.phys.shapes.Shapes.or(result, shape.data);
 			}
-			builder.add(newProperties);
 		}
+		return new VoxelShape(result);
 	}
 
 	@MappedMethod
-	default void addTooltips(ItemStack stack, @Nullable BlockView world, List<MutableText> tooltip, TooltipContext options) {
-	}
-
-	@Deprecated
-	default void appendTooltipHelper(ItemStack stack, @Nullable BlockView world, List<Text> tooltipList, TooltipContext options) {
-		final List<MutableText> newTooltipList = new ArrayList<>();
-		addTooltips(stack, world, newTooltipList, options);
-		newTooltipList.forEach(mutableText -> tooltipList.add(mutableText.data));
-	}
-
-	@MappedMethod
-	static BlockSettings setLuminance(BlockSettings blockSettings, ToIntFunction<BlockState> luminanceFunction) {
-		return new BlockSettings(blockSettings.data.luminance(blockState -> luminanceFunction.applyAsInt(new BlockState(blockState))));
-	}
-
-	@MappedMethod
-	static BlockSettings createBlockSettings(boolean blockPiston, boolean forceSolid) {
-		final AbstractBlock.Settings settings = AbstractBlock.Settings.create().pistonBehavior(blockPiston ? PushReaction.BLOCK : PushReaction.NORMAL);
-		return new BlockSettings(forceSolid ? settings.solid() : settings);
-	}
-
-	@MappedMethod
-	static BlockSettings createBlockSettings(boolean blockPiston, boolean forceSolid, ToIntFunction<BlockState> luminanceFunction) {
-		return setLuminance(createBlockSettings(blockPiston, forceSolid), luminanceFunction);
-	}
-
-	@MappedMethod
-	static VoxelShape shapeUnion(VoxelShape voxelShape, VoxelShape... voxelShapes) {
-		VoxelShape result = voxelShape;
-		for (final VoxelShape additionalShape : voxelShapes) {
-			result = VoxelShapes.union(result, additionalShape);
-		}
-		return result;
+	public static void scheduleBlockTick(World world, BlockPos pos, Block block, int ticks) {
+		world.data.scheduleTick(pos.data, block.data, ticks);
 	}
 }

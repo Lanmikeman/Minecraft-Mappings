@@ -8,6 +8,6 @@ public final class SoundHelper {
 
 	@MappedMethod
 	public static SoundEvent createSoundEvent(Identifier identifier) {
-		return new SoundEvent(net.minecraft.sound.SoundEvent.of(identifier.data));
+		return new SoundEvent(net.minecraft.sounds.SoundEvent.createVariableRangeEvent(identifier.data));
 	}
 }

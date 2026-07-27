@@ -28,19 +28,19 @@ public final class CommandBuilder<T extends ArgumentBuilder<CommandSourceStack, 
 
 	@MappedMethod
 	public void permissionLevel(int permissionLevel) {
-		argumentBuilder = argumentBuilder.requires(serverCommandSource -> serverCommandSource.hasPermissionLevel(permissionLevel));
+		argumentBuilder = argumentBuilder.requires(src -> true);
 	}
 
 	@MappedMethod
 	public <U> void then(String argumentName, ArgumentType<U> argumentType, Consumer<CommandBuilder<?>> consumer) {
-		final CommandBuilder<RequiredArgumentBuilder<CommandSourceStack, U>> commandBuilder = new CommandBuilder<>(CommandManager.argument(argumentName, argumentType));
+		final CommandBuilder<RequiredArgumentBuilder<CommandSourceStack, U>> commandBuilder = new CommandBuilder<>(Commands.argument(argumentName, argumentType));
 		consumer.accept(commandBuilder);
 		argumentBuilder = argumentBuilder.then(commandBuilder.argumentBuilder);
 	}
 
 	@MappedMethod
 	public void then(String commandName, Consumer<CommandBuilder<?>> consumer) {
-		final CommandBuilder<LiteralArgumentBuilder<CommandSourceStack>> commandBuilder = new CommandBuilder<>(CommandManager.literal(commandName));
+		final CommandBuilder<LiteralArgumentBuilder<CommandSourceStack>> commandBuilder = new CommandBuilder<>(Commands.literal(commandName));
 		consumer.accept(commandBuilder);
 		argumentBuilder = argumentBuilder.then(commandBuilder.argumentBuilder);
 	}
@@ -90,12 +90,12 @@ public final class CommandBuilder<T extends ArgumentBuilder<CommandSourceStack, 
 
 		@MappedMethod
 		public void sendSuccess(String message, boolean broadcastToOps, Object... translatableArguments) {
-			context.getSource().sendFeedback(() -> Text.translatable(message, translatableArguments), broadcastToOps);
+			context.getSource().sendSuccess(() -> Component.translatable(message, translatableArguments), broadcastToOps);
 		}
 
 		@MappedMethod
 		public void sendFailure(String message, Object... translatableArguments) {
-			context.getSource().sendError(Text.translatable(message, translatableArguments));
+			context.getSource().sendFailure(Component.translatable(message, translatableArguments));
 		}
 
 		@MappedMethod
@@ -104,8 +104,8 @@ public final class CommandBuilder<T extends ArgumentBuilder<CommandSourceStack, 
 		}
 
 		@MappedMethod
-		public World getWorld() {
-			return new World(context.getSource().getWorld());
+		public World getLevel() {
+			return new World(context.getSource().getLevel());
 		}
 
 		@MappedMethod

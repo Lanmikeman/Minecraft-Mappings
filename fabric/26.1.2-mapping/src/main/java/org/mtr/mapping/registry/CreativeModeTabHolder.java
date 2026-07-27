@@ -1,7 +1,7 @@
 package org.mtr.mapping.registry;
 
-import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.resources.Identifier;
+import org.mtr.mapping.holder.Identifier;
+import org.mtr.mapping.holder.ItemGroup;
 
 public final class CreativeModeTabHolder {
 

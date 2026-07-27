@@ -1,15 +1,8 @@
 package org.mtr.mapping.render.batch;
 
-import com.mojang.blaze3d.opengl.GlStateDefinition;
-import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.util.Util;
-import org.lwjgl.opengl.GL33;
 import org.mtr.mapping.holder.Identifier;
-import org.mtr.mapping.holder.MinecraftClient;
 import org.mtr.mapping.holder.RenderLayer;
-import org.mtr.mapping.holder.VertexFormats;
 import org.mtr.mapping.mapper.OptimizedModel;
-import org.mtr.mapping.mapper.RenderLayerHelper;
 import org.mtr.mapping.render.vertex.VertexAttributeState;
 
 import javax.annotation.Nullable;
@@ -19,55 +12,20 @@ import java.util.function.Function;
 
 /**
  * Properties regarding material. Set during model loading. Affects batching.
+ * GL/setup temporarily stubbed for MC 26.1.2 port.
  */
 public final class MaterialProperties {
 
-	/**
-	 * The texture to use. Null disables texture.
-	 */
 	private Identifier texture;
-	/**
-	 * Name of the shader program. Must be loaded in ShaderManager.
-	 */
 	public final OptimizedModel.ShaderType shaderType;
-	/**
-	 * The vertex attribute values to use for those specified with VertAttrSrc MATERIAL.
-	 */
 	public final VertexAttributeState vertexAttributeState;
-	/**
-	 * If blending should be set up. True for entity_translucent_* and beacon_beam when translucent is true.
-	 */
 	public final boolean translucent;
-	/**
-	 * If depth buffer should be written to. False for beacon_beam when translucent is true, true for everything else.
-	 */
 	public final boolean writeDepthBuf;
 	public final boolean cutoutHack;
 
-	private static final Function<Identifier, RenderLayer> ENTITY_TRANSLUCENT_CULL = Util.memoize((texture) -> RenderLayerHelper.createTriangles(
-			"entity_translucent_cull_triangles",
-			VertexFormats.getPositionColorTextureOverlayLightNormalMapped(),
-			256,
-			true,
-			true,
-			RenderLayer.getEntityTranslucentCull(texture)
-	));
-	private static final BiFunction<Identifier, Boolean, RenderLayer> BEACON_BEAM = Util.memoize((texture, translucent) -> RenderLayerHelper.createTriangles(
-			"beacon_beam_triangles",
-			VertexFormats.getPositionColorTextureOverlayLightNormalMapped(),
-			256,
-			false,
-			translucent,
-			RenderLayer.getBeaconBeam(texture, translucent)
-	));
-	private static final Function<Identifier, RenderLayer> ENTITY_CUTOUT = Util.memoize((texture) -> RenderLayerHelper.createTriangles(
-			"entity_cutout_triangles",
-			VertexFormats.getPositionColorTextureOverlayLightNormalMapped(),
-			256,
-			true,
-			false,
-			RenderLayer.getEntityCutout(texture)
-	));
+	private static final Function<Identifier, RenderLayer> ENTITY_TRANSLUCENT_CULL = texture -> null;
+	private static final BiFunction<Identifier, Boolean, RenderLayer> BEACON_BEAM = (texture, translucent) -> null;
+	private static final Function<Identifier, RenderLayer> ENTITY_CUTOUT = texture -> null;
 
 	public MaterialProperties(OptimizedModel.ShaderType shaderType, Identifier texture, @Nullable Integer color) {
 		this.shaderType = shaderType;
@@ -80,97 +38,53 @@ public final class MaterialProperties {
 				vertexAttributeState = new VertexAttributeState(color, null);
 				break;
 			case TRANSLUCENT:
+			case TRANSLUCENT_BRIGHT:
 				translucent = true;
 				writeDepthBuf = true;
 				cutoutHack = false;
 				vertexAttributeState = new VertexAttributeState(color, null);
 				break;
+			case CUTOUT:
 			case CUTOUT_BRIGHT:
-				translucent = false;
-				writeDepthBuf = true;
-				cutoutHack = false;
-				vertexAttributeState = new VertexAttributeState(color, 15 << 4 | 15 << 20);
-				break;
-			case TRANSLUCENT_BRIGHT:
-				translucent = true;
-				writeDepthBuf = true;
-				cutoutHack = false;
-				vertexAttributeState = new VertexAttributeState(color, 15 << 4 | 15 << 20);
-				break;
-			case CUTOUT_GLOWING:
 				translucent = false;
 				writeDepthBuf = true;
 				cutoutHack = true;
 				vertexAttributeState = new VertexAttributeState(color, null);
 				break;
-			case TRANSLUCENT_GLOWING:
-				translucent = true;
-				writeDepthBuf = false;
-				cutoutHack = false;
-				vertexAttributeState = new VertexAttributeState(color, null);
-				break;
-		}
+					}
 	}
 
-	public void setupCompositeState() {
-		RenderSystem.setShaderTexture(0, texture.data);
+	public void setTexture(Identifier texture) { this.texture = texture; }
+	public Identifier getTexture() { return texture; }
 
-		// HACK: To make cutout transparency on beacon_beam work
-		if (translucent || cutoutHack) {
-			RenderSystem.enableBlend(); // TransparentState
-			RenderSystem.blendFuncSeparate(GlStateDefinition.SrcFactor.SRC_ALPHA, GlStateDefinition.DstFactor.ONE_MINUS_SRC_ALPHA, GlStateDefinition.SrcFactor.ONE, GlStateDefinition.DstFactor.ONE_MINUS_SRC_ALPHA);
-		} else {
-			RenderSystem.disableBlend();
-		}
-
-		RenderSystem.enableDepthTest(); // DepthTestState
-		RenderSystem.depthFunc(GL33.GL_LEQUAL);
-		RenderSystem.enableCull();
-		MinecraftClient.getInstance().getGameRendererMapped().getLightmapTextureManager().enable(); // LightmapState
-		MinecraftClient.getInstance().getGameRendererMapped().getOverlayTexture().setupOverlayColor(); // OverlayState
-		RenderSystem.depthMask(writeDepthBuf); // WriteMaskState
-	}
-
-	public RenderLayer getBlazeRenderType() {
+	public RenderLayer getRenderLayer() {
+		if (texture == null) return null;
 		switch (shaderType) {
 			case TRANSLUCENT:
 			case TRANSLUCENT_BRIGHT:
 				return ENTITY_TRANSLUCENT_CULL.apply(texture);
-			case CUTOUT_GLOWING:
-			case TRANSLUCENT_GLOWING:
-				return BEACON_BEAM.apply(texture, translucent);
-			default:
+						default:
 				return ENTITY_CUTOUT.apply(texture);
 		}
 	}
 
-	public Identifier getTexture() {
-		return texture;
+	public void setupGlState() {
+		// TODO 26.1 RenderSystem/GlState API
 	}
 
-	public void setTexture(Identifier texture) {
-		this.texture = texture;
+	public void cleanupGlState() {
+		// TODO 26.1 RenderSystem/GlState API
 	}
 
 	@Override
-	public boolean equals(Object object) {
-		if (this == object) {
-			return true;
-		}
-		if (!(object instanceof MaterialProperties)) {
-			return false;
-		}
-		final MaterialProperties materialProperties = (MaterialProperties) object;
-		return shaderType == materialProperties.shaderType &&
-				Objects.equals(texture, materialProperties.texture) &&
-				Objects.equals(vertexAttributeState, materialProperties.vertexAttributeState) &&
-				translucent == materialProperties.translucent &&
-				writeDepthBuf == materialProperties.writeDepthBuf &&
-				cutoutHack == materialProperties.cutoutHack;
+	public boolean equals(Object obj) {
+		if (this == obj) return true;
+		if (!(obj instanceof MaterialProperties other)) return false;
+		return shaderType == other.shaderType && Objects.equals(texture, other.texture) && translucent == other.translucent;
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(shaderType, texture, vertexAttributeState, translucent, writeDepthBuf, cutoutHack);
+		return Objects.hash(shaderType, texture, translucent);
 	}
 }

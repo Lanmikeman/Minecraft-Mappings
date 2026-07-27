@@ -1,16 +1,12 @@
 package org.mtr.mapping.registry;
 
-// TODO 26.1: BlockRenderLayerMap removed
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.fabric.api.client.particle.v1.ParticleFactoryRegistry;
-import net.fabricmc.fabric.api.client.rendering.v1.BlockColorRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
-import net.fabricmc.fabric.api.networking.v1.PacketBuffers;
-import net.minecraft.client.renderer.item.ItemProperties;
-import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
 import com.mojang.blaze3d.platform.InputConstants;
+import net.minecraft.client.KeyMapping;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.Identifier;
 import org.mtr.mapping.annotation.MappedMethod;
 import org.mtr.mapping.holder.*;
 import org.mtr.mapping.mapper.*;
@@ -42,7 +38,7 @@ public final class RegistryClient extends DummyClass {
 
 	@MappedMethod
 	public <T extends BlockEntityTypeRegistryObject<U>, U extends BlockEntityExtension> void registerBlockEntityRenderer(T blockEntityType, Function<BlockEntityRenderer.Argument, BlockEntityRenderer<U>> rendererInstance) {
-		objectsToRegister.add(() -> BlockEntityRenderers.register(blockEntityType.get().data, context -> rendererInstance.apply(new BlockEntityRenderer.Argument(context))));
+		objectsToRegister.add(() -> net.minecraft.client.renderer.blockentity.BlockEntityRenderers.register(blockEntityType.get().data, context -> rendererInstance.apply(new BlockEntityRenderer.Argument(context))));
 	}
 
 	@MappedMethod
@@ -52,7 +48,7 @@ public final class RegistryClient extends DummyClass {
 
 	@MappedMethod
 	public void registerParticleRenderer(ParticleTypeRegistryObject particleTypeRegistryObject, Function<SpriteProvider, ParticleFactoryExtension> factory) {
-		ParticleFactoryRegistry.getInstance().register(particleTypeRegistryObject.get().data, spriteProvider -> factory.apply(new SpriteProvider(spriteProvider)));
+		// TODO 26.1 particle factory registry
 	}
 
 	@MappedMethod
@@ -62,49 +58,52 @@ public final class RegistryClient extends DummyClass {
 
 	@MappedMethod
 	public KeyBinding registerKeyBinding(String translationKey, int key, String categoryKey) {
-		return new KeyBinding(KeyMappingHelper.registerKeyMapping(new net.minecraft.client.KeyMapping(translationKey, InputConstants.Type.KEYSYM, key, categoryKey)));
+		final KeyMapping.Category category = new KeyMapping.Category(Identifier.parse(categoryKey.contains(":") ? categoryKey : "mtr:" + categoryKey));
+		return new KeyBinding(KeyMappingHelper.registerKeyMapping(new KeyMapping(translationKey, InputConstants.Type.KEYSYM, key, category)));
 	}
 
 	@MappedMethod
-	public void registerBlockColors(BlockColorProvider blockColorProvider, BlockRegistryObject... blocks) {
-		final net.minecraft.world.level.block.Block[] newBlocks = new net.minecraft.world.level.block.Block[blocks.length];
-		for (int i = 0; i < blocks.length; i++) {
-			newBlocks[i] = blocks[i].get().data;
+	public void registerBlockColors(Object blockColorProvider, BlockRegistryObject... blocks) {
+		// TODO 26.1 block colors
+	}
+
+	@MappedMethod
+	public void registerItemColors(Object itemColorProvider, ItemRegistryObject... items) {
+		// TODO 26.1 item colors
+	}
+
+	@MappedMethod
+	public void registerItemModelPredicate(ItemRegistryObject item, org.mtr.mapping.holder.Identifier identifier, ModelPredicateProvider modelPredicateProvider) {
+		/* TODO 26.1 item model predicates */
+	}
+
+	@MappedMethod
+	public void setupPackets(org.mtr.mapping.holder.Identifier identifier) {
+		if (registry.payloadType == null) {
+			registry.setupPackets(identifier);
 		}
-		BlockColorRegistry.register((blockState, blockRenderView, blockPos, tintIndex) -> blockColorProvider.getColor2(new BlockState(blockState), blockRenderView == null ? null : new BlockRenderView(blockRenderView), blockPos == null ? null : new BlockPos(blockPos), tintIndex), newBlocks);
-	}
-
-	@MappedMethod
-	public void registerItemColors(ItemColorProvider itemColorProvider, ItemRegistryObject... items) {
-		final net.minecraft.world.item.Item[] newItems = new net.minecraft.world.item.Item[items.length];
-		for (int i = 0; i < items.length; i++) {
-			newItems[i] = items[i].get().data;
-		}
-		/* TODO 26.1 item colors */;
-	}
-
-	@MappedMethod
-	public void registerItemModelPredicate(ItemRegistryObject item, Identifier identifier, ModelPredicateProvider modelPredicateProvider) {
-		ItemProperties.register(item.get().data, identifier.data, (itemStack, clientWorld, livingEntity, seed) -> modelPredicateProvider.call(new ItemStack(itemStack), clientWorld == null ? null : new ClientWorld(clientWorld), livingEntity == null ? null : new LivingEntity(livingEntity)));
-	}
-
-	@MappedMethod
-	public void setupPackets(Identifier identifier) {
-		ClientPlayNetworking.registerGlobalReceiver(identifier.data, (client, handler, buf, responseSender) -> PacketBufferReceiver.receive(buf, packetBufferReceiver -> {
-			final Function<PacketBufferReceiver, ? extends PacketHandler> getInstance = registry.packets.get(packetBufferReceiver.readString());
-			if (getInstance != null) {
-				getInstance.apply(packetBufferReceiver).runClient();
-			}
-		}, client::execute));
+		ClientPlayNetworking.registerGlobalReceiver(registry.payloadType, (payload, context) -> {
+			final FriendlyByteBuf buf = new FriendlyByteBuf(io.netty.buffer.Unpooled.wrappedBuffer(payload.bytes()));
+			PacketBufferReceiver.receive(buf, packetBufferReceiver -> {
+				final Function<PacketBufferReceiver, ? extends PacketHandler> getInstance = registry.packets.get(packetBufferReceiver.readString());
+				if (getInstance != null) {
+					getInstance.apply(packetBufferReceiver).runClient();
+				}
+			}, context.client()::execute);
+		});
 	}
 
 	@MappedMethod
 	public <T extends PacketHandler> void sendPacketToServer(T data) {
-		if (registry.packetsIdentifier != null) {
-			final PacketBufferSender packetBufferSender = new PacketBufferSender(PacketBuffers::create);
+		if (registry.packetsIdentifier != null && registry.payloadType != null) {
+			final PacketBufferSender packetBufferSender = new PacketBufferSender(() -> new FriendlyByteBuf(io.netty.buffer.Unpooled.buffer()));
 			packetBufferSender.writeString(data.getClass().getName());
 			data.write(packetBufferSender);
-			packetBufferSender.send(byteBuf -> ClientPlayNetworking.send(registry.packetsIdentifier.data, byteBuf instanceof FriendlyByteBuf ? (FriendlyByteBuf) byteBuf : new FriendlyByteBuf(byteBuf)), MinecraftClient.getInstance()::execute);
+			packetBufferSender.send(byteBuf -> {
+				final byte[] bytes = new byte[byteBuf.readableBytes()];
+				byteBuf.readBytes(bytes);
+				ClientPlayNetworking.send(new Registry.MtrPayload(registry.payloadType, bytes));
+			}, MinecraftClient.getInstance()::execute);
 		}
 	}
 

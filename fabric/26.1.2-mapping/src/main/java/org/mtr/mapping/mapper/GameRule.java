@@ -6,28 +6,32 @@ import org.mtr.mapping.holder.MinecraftServer;
 
 import javax.annotation.Nullable;
 
+/**
+ * Stable MTR enum names mapped onto Minecraft 26.1.2 GameRules constants.
+ * Boolean/Integer distinction is preserved for MappedMethod callers.
+ */
 public enum GameRule {
 
-	ANNOUNCE_ADVANCEMENTS(GameRules.ANNOUNCE_ADVANCEMENTS, null),
+	ANNOUNCE_ADVANCEMENTS(GameRules.SHOW_ADVANCEMENT_MESSAGES, null),
 	BLOCK_EXPLOSION_DROP_DECAY(GameRules.BLOCK_EXPLOSION_DROP_DECAY, null),
 	COMMAND_BLOCK_OUTPUT(GameRules.COMMAND_BLOCK_OUTPUT, null),
-	DISABLE_ELYTRA_MOVEMENT_CHECK(GameRules.DISABLE_ELYTRA_MOVEMENT_CHECK, null),
-	DISABLE_RAIDS(GameRules.DISABLE_RAIDS, null),
-	DO_DAYLIGHT_CYCLE(GameRules.DO_DAYLIGHT_CYCLE, null),
-	DO_ENTITY_DROPS(GameRules.DO_ENTITY_DROPS, null),
-	DO_FIRE_TICK(GameRules.DO_FIRE_TICK, null),
-	DO_IMMEDIATE_RESPAWN(GameRules.DO_IMMEDIATE_RESPAWN, null),
-	DO_INSOMNIA(GameRules.DO_INSOMNIA, null),
-	DO_LIMITED_CRAFTING(GameRules.DO_LIMITED_CRAFTING, null),
-	DO_MOB_GRIEFING(GameRules.DO_MOB_GRIEFING, null),
-	DO_MOB_LOOT(GameRules.DO_MOB_LOOT, null),
-	DO_MOB_SPAWNING(GameRules.DO_MOB_SPAWNING, null),
-	DO_PATROL_SPAWNING(GameRules.DO_PATROL_SPAWNING, null),
-	DO_TILE_DROPS(GameRules.DO_TILE_DROPS, null),
-	DO_TRADER_SPAWNING(GameRules.DO_TRADER_SPAWNING, null),
-	DO_VINES_SPREAD(GameRules.DO_VINES_SPREAD, null),
-	DO_WARDEN_SPAWNING(GameRules.DO_WARDEN_SPAWNING, null),
-	DO_WEATHER_CYCLE(GameRules.DO_WEATHER_CYCLE, null),
+	DISABLE_ELYTRA_MOVEMENT_CHECK(GameRules.ELYTRA_MOVEMENT_CHECK, null),
+	DISABLE_RAIDS(GameRules.RAIDS, null),
+	DO_DAYLIGHT_CYCLE(GameRules.ADVANCE_TIME, null),
+	DO_ENTITY_DROPS(GameRules.ENTITY_DROPS, null),
+	DO_FIRE_TICK(null, GameRules.FIRE_SPREAD_RADIUS_AROUND_PLAYER),
+	DO_IMMEDIATE_RESPAWN(GameRules.IMMEDIATE_RESPAWN, null),
+	DO_INSOMNIA(GameRules.SPAWN_PHANTOMS, null),
+	DO_LIMITED_CRAFTING(GameRules.LIMITED_CRAFTING, null),
+	DO_MOB_GRIEFING(GameRules.MOB_GRIEFING, null),
+	DO_MOB_LOOT(GameRules.MOB_DROPS, null),
+	DO_MOB_SPAWNING(GameRules.SPAWN_MOBS, null),
+	DO_PATROL_SPAWNING(GameRules.SPAWN_PATROLS, null),
+	DO_TILE_DROPS(GameRules.BLOCK_DROPS, null),
+	DO_TRADER_SPAWNING(GameRules.SPAWN_WANDERING_TRADERS, null),
+	DO_VINES_SPREAD(GameRules.SPREAD_VINES, null),
+	DO_WARDEN_SPAWNING(GameRules.SPAWN_WARDENS, null),
+	DO_WEATHER_CYCLE(GameRules.ADVANCE_WEATHER, null),
 	DROWNING_DAMAGE(GameRules.DROWNING_DAMAGE, null),
 	ENDER_PEARLS_VANISH_ON_DEATH(GameRules.ENDER_PEARLS_VANISH_ON_DEATH, null),
 	FALL_DAMAGE(GameRules.FALL_DAMAGE, null),
@@ -39,7 +43,7 @@ public enum GameRule {
 	LAVA_SOURCE_CONVERSION(GameRules.LAVA_SOURCE_CONVERSION, null),
 	LOG_ADMIN_COMMANDS(GameRules.LOG_ADMIN_COMMANDS, null),
 	MOB_EXPLOSION_DROP_DECAY(GameRules.MOB_EXPLOSION_DROP_DECAY, null),
-	NATURAL_REGENERATION(GameRules.NATURAL_REGENERATION, null),
+	NATURAL_REGENERATION(GameRules.NATURAL_HEALTH_REGENERATION, null),
 	PROJECTILES_CAN_BREAK_BLOCKS(GameRules.PROJECTILES_CAN_BREAK_BLOCKS, null),
 	REDUCED_DEBUG_INFO(GameRules.REDUCED_DEBUG_INFO, null),
 	SEND_COMMAND_FEEDBACK(GameRules.SEND_COMMAND_FEEDBACK, null),
@@ -48,37 +52,40 @@ public enum GameRule {
 	TNT_EXPLOSION_DROP_DECAY(GameRules.TNT_EXPLOSION_DROP_DECAY, null),
 	UNIVERSAL_ANGER(GameRules.UNIVERSAL_ANGER, null),
 	WATER_SOURCE_CONVERSION(GameRules.WATER_SOURCE_CONVERSION, null),
-	COMMAND_MODIFICATION_BLOCK_LIMIT(null, GameRules.COMMAND_MODIFICATION_BLOCK_LIMIT),
-	MAX_COMMAND_CHAIN_LENGTH(null, GameRules.MAX_COMMAND_CHAIN_LENGTH),
-	MAX_COMMAND_FORK_COUNT(null, GameRules.MAX_COMMAND_FORK_COUNT),
+	COMMAND_MODIFICATION_BLOCK_LIMIT(null, GameRules.MAX_BLOCK_MODIFICATIONS),
+	MAX_COMMAND_CHAIN_LENGTH(null, GameRules.MAX_COMMAND_SEQUENCE_LENGTH),
+	MAX_COMMAND_FORK_COUNT(null, GameRules.MAX_COMMAND_FORKS),
 	MAX_ENTITY_CRAMMING(null, GameRules.MAX_ENTITY_CRAMMING),
 	PLAYERS_NETHER_PORTAL_CREATIVE_DELAY(null, GameRules.PLAYERS_NETHER_PORTAL_CREATIVE_DELAY),
 	PLAYERS_NETHER_PORTAL_DEFAULT_DELAY(null, GameRules.PLAYERS_NETHER_PORTAL_DEFAULT_DELAY),
 	PLAYERS_SLEEPING_PERCENTAGE(null, GameRules.PLAYERS_SLEEPING_PERCENTAGE),
 	RANDOM_TICK_SPEED(null, GameRules.RANDOM_TICK_SPEED),
-	SNOW_ACCUMULATION_HEIGHT(null, GameRules.SNOW_ACCUMULATION_HEIGHT),
-	SPAWN_RADIUS(null, GameRules.SPAWN_RADIUS);
-
+	SNOW_ACCUMULATION_HEIGHT(null, GameRules.MAX_SNOW_ACCUMULATION_HEIGHT),
+	SPAWN_RADIUS(null, GameRules.RESPAWN_RADIUS);
 
 	@Nullable
-	private final net.minecraft.world.level.GameRules.Key<net.minecraft.world.level.GameRules.BooleanValue> gameRuleBoolean;
+	private final net.minecraft.world.level.gamerules.GameRule<Boolean> gameRuleBoolean;
 	@Nullable
-	private final net.minecraft.world.level.GameRules.Key<net.minecraft.world.level.GameRules.IntegerValue> gameRuleInteger;
+	private final net.minecraft.world.level.gamerules.GameRule<Integer> gameRuleInteger;
 
 	@Deprecated
-	GameRule(@Nullable net.minecraft.world.level.GameRules.Key<net.minecraft.world.level.GameRules.BooleanValue> gameRuleBoolean, @Nullable net.minecraft.world.level.GameRules.Key<net.minecraft.world.level.GameRules.IntegerValue> gameRuleInteger) {
+	GameRule(@Nullable net.minecraft.world.level.gamerules.GameRule<Boolean> gameRuleBoolean, @Nullable net.minecraft.world.level.gamerules.GameRule<Integer> gameRuleInteger) {
 		this.gameRuleBoolean = gameRuleBoolean;
 		this.gameRuleInteger = gameRuleInteger;
 	}
 
 	@MappedMethod
 	public boolean getBooleanGameRule(MinecraftServer minecraftServer) {
-		return gameRuleBoolean != null && minecraftServer.data.getGameRules().getBoolean(gameRuleBoolean);
+		return gameRuleBoolean != null && Boolean.TRUE.equals(minecraftServer.data.getGameRules().get(gameRuleBoolean));
 	}
 
 	@MappedMethod
 	public int getIntegerGameRule(MinecraftServer minecraftServer) {
-		return gameRuleInteger == null ? 0 : minecraftServer.data.getGameRules().getInt(gameRuleInteger);
+		if (gameRuleInteger == null) {
+			return 0;
+		}
+		final Integer value = minecraftServer.data.getGameRules().get(gameRuleInteger);
+		return value == null ? 0 : value;
 	}
 
 	@MappedMethod

@@ -1,11 +1,17 @@
 package org.mtr.mapping.mapper;
 
-import net.minecraft.world.level.block.DirectionalBlock;
-import net.minecraft.world.level.block.HorizontalDirectionalBlock;
-import org.mtr.mapping.holder.DirectionProperty;
+import org.mtr.mapping.annotation.MappedMethod;
+import org.mtr.mapping.holder.Direction;
+import org.mtr.mapping.tool.DummyClass;
 
-public interface DirectionHelper {
+public final class DirectionHelper extends DummyClass {
+	@MappedMethod
+	public static Direction rotateYClockwise(Direction direction) {
+		return Direction.convert(direction.data.getClockWise());
+	}
 
-	DirectionProperty FACING = new DirectionProperty(HorizontalDirectionalBlock.FACING);
-	DirectionProperty FACING_NORMAL = new DirectionProperty(DirectionalBlock.FACING);
+	@MappedMethod
+	public static Direction rotateYCounterclockwise(Direction direction) {
+		return Direction.convert(direction.data.getCounterClockWise());
+	}
 }

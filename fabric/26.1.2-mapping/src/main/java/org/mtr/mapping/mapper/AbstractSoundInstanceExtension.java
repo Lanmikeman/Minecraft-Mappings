@@ -1,47 +1,17 @@
 package org.mtr.mapping.mapper;
 
-import net.minecraft.client.Minecraft;
 import org.mtr.mapping.annotation.MappedMethod;
 import org.mtr.mapping.holder.*;
 
-import java.util.function.Consumer;
-
 public abstract class AbstractSoundInstanceExtension extends AbstractSoundInstanceAbstractMapping {
-
 	@MappedMethod
-	protected void setIsRelativeMapped(boolean isRelative) {
-		relative = isRelative;
+	public AbstractSoundInstanceExtension(SoundEvent sound, SoundCategory category) {
+		super(sound, category, new Random(net.minecraft.util.RandomSource.create()));
 	}
 
 	@MappedMethod
-	protected void setIsRepeatableMapped(boolean isRepeatable) {
-		repeat = isRepeatable;
-	}
+	public void setVolume2(float volume) { this.volume = volume; }
 
 	@MappedMethod
-	@Override
-	public boolean isRelative() {
-		return super.isRelative();
-	}
-
-	@MappedMethod
-	@Override
-	public boolean isRepeatable() {
-		return super.isRepeatable();
-	}
-
-	@MappedMethod
-	protected AbstractSoundInstanceExtension(SoundEvent sound, SoundCategory category) {
-		super(sound, category, new Random(net.minecraft.util.math.random.Random.create()));
-	}
-
-	@MappedMethod
-	protected AbstractSoundInstanceExtension(Identifier soundId, SoundCategory category) {
-		super(soundId, category, new Random(net.minecraft.util.math.random.Random.create()));
-	}
-
-	@MappedMethod
-	public static void iterateSoundIds(Consumer<Identifier> consumer) {
-		MinecraftClient.getInstance().getSoundManager().getKeys().forEach(identifier -> consumer.accept(new Identifier(identifier)));
-	}
+	public void setPitch2(float pitch) { this.pitch = pitch; }
 }

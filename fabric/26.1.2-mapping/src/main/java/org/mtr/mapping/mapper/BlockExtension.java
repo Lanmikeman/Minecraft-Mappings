@@ -1,76 +1,12 @@
 package org.mtr.mapping.mapper;
 
-import net.minecraft.world.level.block.state.StateDefinition;
-import net.minecraft.network.chat.Component;
-import net.minecraft.world.level.LevelReader;
 import org.mtr.mapping.annotation.MappedMethod;
-import org.mtr.mapping.holder.*;
+import org.mtr.mapping.holder.BlockAbstractMapping;
+import org.mtr.mapping.holder.BlockSettings;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.util.List;
-
-public class BlockExtension extends BlockAbstractMapping implements BlockHelper {
-
+public abstract class BlockExtension extends BlockAbstractMapping {
 	@MappedMethod
 	public BlockExtension(BlockSettings blockSettings) {
 		super(blockSettings);
-	}
-
-	@MappedMethod
-	public void onBreak2(World world, BlockPos pos, BlockState state, PlayerEntity player) {
-		super.onBreak(world.data, pos.data, state.data, player.data);
-	}
-
-	@Deprecated
-	@Override
-	public final net.minecraft.world.level.block.state.BlockState onBreak(net.minecraft.world.level.Level world, net.minecraft.core.BlockPos pos, net.minecraft.world.level.block.state.BlockState state, net.minecraft.world.entity.player.Player player) {
-		onBreak2(new World(world), new BlockPos(pos), new BlockState(state), new PlayerEntity(player));
-		return state;
-	}
-
-	@Nonnull
-	@MappedMethod
-	public ItemStack getPickStack2(BlockView world, BlockPos pos, BlockState state) {
-		return world.data instanceof WorldView ? new ItemStack(super.getPickStack((WorldView) world.data, pos.data, state.data)) : ItemStack.getEmptyMapped();
-	}
-
-	@Nonnull
-	@Deprecated
-	@Override
-	public final net.minecraft.world.item.ItemStack getPickStack(WorldView world, net.minecraft.core.BlockPos pos, net.minecraft.world.level.block.state.BlockState state) {
-		return getPickStack2(new BlockView(world), new BlockPos(pos), new BlockState(state)).data;
-	}
-
-	@Deprecated
-	@Override
-	protected final void appendProperties(StateDefinition.Builder<net.minecraft.world.level.block.Block, net.minecraft.world.level.block.state.BlockState> builder) {
-		appendPropertiesHelper(builder);
-	}
-
-	@Deprecated
-	@Override
-	public final void appendTooltip(net.minecraft.world.item.ItemStack stack, @Nullable net.minecraft.world.level.BlockGetter world, List<Text> tooltip, net.minecraft.world.item.Item$TooltipContext options) {
-		appendTooltipHelper(new ItemStack(stack), world == null ? null : new BlockView(world), tooltip, new TooltipContext(options));
-	}
-
-	@MappedMethod
-	public static void scheduleBlockTick(World world, BlockPos pos, Block block, int ticks) {
-		world.data.scheduleBlockTick(pos.data, block.data, ticks);
-	}
-
-	@MappedMethod
-	public static boolean hasScheduledBlockTick(World world, BlockPos pos, Block block) {
-		return world.data.getBlockTickScheduler().isQueued(pos.data, block.data);
-	}
-
-	@MappedMethod
-	public static void scheduleFluidTick(World world, BlockPos pos, Fluid fluid, int ticks) {
-		world.data.scheduleFluidTick(pos.data, fluid.data, ticks);
-	}
-
-	@MappedMethod
-	public static boolean hasScheduledFluidTick(World world, BlockPos pos, Fluid fluid) {
-		return world.data.getFluidTickScheduler().isQueued(pos.data, fluid.data);
 	}
 }

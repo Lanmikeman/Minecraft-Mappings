@@ -48,12 +48,12 @@ public class EventRegistry extends DummyClass {
 
 	@MappedMethod
 	public void registerStartWorldTick(Consumer<ServerWorld> consumer) {
-		ServerTickEvents.START_WORLD_TICK.register(serverWorld -> consumer.accept(new ServerWorld(serverWorld)));
+		// TODO 26.1 START_WORLD_TICK
 	}
 
 	@MappedMethod
 	public void registerEndWorldTick(Consumer<ServerWorld> consumer) {
-		ServerTickEvents.END_WORLD_TICK.register(serverWorld -> consumer.accept(new ServerWorld(serverWorld)));
+		// TODO 26.1 END_WORLD_TICK
 	}
 
 	@MappedMethod
@@ -68,11 +68,11 @@ public class EventRegistry extends DummyClass {
 
 	@MappedMethod
 	public void registerChunkLoad(BiConsumer<ServerWorld, WorldChunk> consumer) {
-		ServerChunkEvents.CHUNK_LOAD.register((serverWorld, worldChunk) -> consumer.accept(new ServerWorld(serverWorld), new WorldChunk(worldChunk)));
+		// TODO 26.1 chunk events signature
 	}
 
 	@MappedMethod
 	public void registerChunkUnload(BiConsumer<ServerWorld, WorldChunk> consumer) {
-		ServerChunkEvents.CHUNK_UNLOAD.register((serverWorld, worldChunk) -> consumer.accept(new ServerWorld(serverWorld), new WorldChunk(worldChunk)));
+		// TODO 26.1 chunk events signature
 	}
 }

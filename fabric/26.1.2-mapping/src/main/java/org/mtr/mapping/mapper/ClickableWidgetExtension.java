@@ -1,7 +1,7 @@
 package org.mtr.mapping.mapper;
 
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
 import org.mtr.mapping.annotation.MappedMethod;
 import org.mtr.mapping.holder.ClickableWidgetAbstractMapping;
 import org.mtr.mapping.holder.MutableText;
@@ -20,8 +20,8 @@ public class ClickableWidgetExtension extends ClickableWidgetAbstractMapping {
 	}
 
 	@MappedMethod
-	public ClickableWidgetExtension(int x, int y, int width, int height, MutableComponent message) {
-		super(x, y, width, height, new Component(message.data));
+	public ClickableWidgetExtension(int x, int y, int width, int height, MutableText message) {
+		super(x, y, width, height, new Text(message.data));
 	}
 
 	@MappedMethod
@@ -30,7 +30,7 @@ public class ClickableWidgetExtension extends ClickableWidgetAbstractMapping {
 
 	@Deprecated
 	@Override
-	public final void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
+	public final void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
 		GraphicsHolder.createInstanceSafe(context, graphicsHolder -> render(graphicsHolder, mouseX, mouseY, delta));
 	}
 
@@ -73,6 +73,6 @@ public class ClickableWidgetExtension extends ClickableWidgetAbstractMapping {
 
 	@Deprecated
 	@Override
-	protected final void appendClickableNarrations(NarrationMessageBuilder builder) {
+	protected final void appendClickableNarrations(NarrationElementOutput builder) {
 	}
 }

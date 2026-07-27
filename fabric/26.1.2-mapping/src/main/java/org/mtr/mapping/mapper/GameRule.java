@@ -61,12 +61,12 @@ public enum GameRule {
 
 
 	@Nullable
-	private final GameRules.Key<GameRules.BooleanRule> gameRuleBoolean;
+	private final net.minecraft.world.level.GameRules.Key<net.minecraft.world.level.GameRules.BooleanValue> gameRuleBoolean;
 	@Nullable
-	private final GameRules.Key<GameRules.IntRule> gameRuleInteger;
+	private final net.minecraft.world.level.GameRules.Key<net.minecraft.world.level.GameRules.IntegerValue> gameRuleInteger;
 
 	@Deprecated
-	GameRule(@Nullable GameRules.Key<GameRules.BooleanRule> gameRuleBoolean, @Nullable GameRules.Key<GameRules.IntRule> gameRuleInteger) {
+	GameRule(@Nullable net.minecraft.world.level.GameRules.Key<net.minecraft.world.level.GameRules.BooleanValue> gameRuleBoolean, @Nullable net.minecraft.world.level.GameRules.Key<net.minecraft.world.level.GameRules.IntegerValue> gameRuleInteger) {
 		this.gameRuleBoolean = gameRuleBoolean;
 		this.gameRuleInteger = gameRuleInteger;
 	}

@@ -10,31 +10,31 @@ import org.mtr.mapping.tool.DummyClass;
 public final class TextHelper extends DummyClass {
 
 	@MappedMethod
-	public static MutableComponent translatable(String key, Object... arguments) {
-		return new MutableComponent(Component.translatable(key, arguments));
+	public static MutableText translatable(String key, Object... arguments) {
+		return new MutableText(Text.translatable(key, arguments));
 	}
 
 	@MappedMethod
-	public static MutableComponent literal(String key) {
-		return new MutableComponent(Component.literal(key));
+	public static MutableText literal(String key) {
+		return new MutableText(Text.literal(key));
 	}
 
 	@MappedMethod
-	public static MutableComponent setStyle(MutableComponent mutableText, Style style) {
-		return new MutableComponent(mutableText.data.setStyle(style.data));
+	public static MutableText setStyle(MutableText mutableText, Style style) {
+		return new MutableText(mutableText.data.setStyle(style.data));
 	}
 
 	@MappedMethod
-	public static FormattedCharSequence mutableTextToOrderedText(MutableComponent mutableText) {
-		return new FormattedCharSequence(mutableText.data.asOrderedText());
+	public static OrderedText mutableTextToOrderedText(MutableText mutableText) {
+		return new OrderedText(mutableText.data.asOrderedText());
 	}
 
 	@MappedMethod
-	public static MutableComponent append(MutableComponent baseText, MutableComponent... moreText) {
+	public static MutableText append(MutableText baseText, MutableText... moreText) {
 		net.minecraft.network.chat.MutableComponent result = baseText.data;
-		for (final MutableComponent mutableText : moreText) {
+		for (final MutableText mutableText : moreText) {
 			result = result.append(mutableText.data);
 		}
-		return new MutableComponent(result);
+		return new MutableText(result);
 	}
 }

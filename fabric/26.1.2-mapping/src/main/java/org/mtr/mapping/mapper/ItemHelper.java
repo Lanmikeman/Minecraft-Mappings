@@ -15,12 +15,12 @@ import java.util.List;
 public interface ItemHelper extends DummyInterface {
 
 	@MappedMethod
-	default void addTooltips(ItemStack stack, @Nullable Level world, List<MutableComponent> tooltip, TooltipContext options) {
+	default void addTooltips(ItemStack stack, @Nullable World world, List<MutableText> tooltip, TooltipContext options) {
 	}
 
 	@Deprecated
-	default void appendTooltipHelper(ItemStack stack, @Nullable Level world, List<Component> tooltipList, TooltipContext options) {
-		final List<MutableComponent> newTooltipList = new ArrayList<>();
+	default void appendTooltipHelper(ItemStack stack, @Nullable World world, List<Text> tooltipList, TooltipContext options) {
+		final List<MutableText> newTooltipList = new ArrayList<>();
 		addTooltips(stack, world, newTooltipList, options);
 		newTooltipList.forEach(mutableText -> tooltipList.add(mutableText.data));
 	}

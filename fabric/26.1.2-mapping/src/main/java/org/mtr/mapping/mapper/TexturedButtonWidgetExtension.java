@@ -1,7 +1,7 @@
 package org.mtr.mapping.mapper;
 
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.ButtonTextures;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.WidgetSprites;
 import org.mtr.mapping.annotation.MappedMethod;
 import org.mtr.mapping.holder.Identifier;
 import org.mtr.mapping.holder.MutableText;
@@ -21,8 +21,8 @@ public class TexturedButtonWidgetExtension extends TexturedButtonWidgetAbstractM
 	}
 
 	@MappedMethod
-	public TexturedButtonWidgetExtension(int x, int y, int width, int height, Identifier normalTexture, Identifier highlightedTexture, Identifier disabledTexture, org.mtr.mapping.holder.PressAction onPress, MutableComponent message) {
-		super(x, y, width, height, new ButtonTextures(formatIdentifier(normalTexture), formatIdentifier(disabledTexture), formatIdentifier(highlightedTexture)), onPress, new Component(message.data));
+	public TexturedButtonWidgetExtension(int x, int y, int width, int height, Identifier normalTexture, Identifier highlightedTexture, Identifier disabledTexture, org.mtr.mapping.holder.PressAction onPress, MutableText message) {
+		super(x, y, width, height, new WidgetSprites(formatIdentifier(normalTexture), formatIdentifier(disabledTexture), formatIdentifier(highlightedTexture)), onPress, new Text(message.data));
 	}
 
 	@MappedMethod
@@ -34,7 +34,7 @@ public class TexturedButtonWidgetExtension extends TexturedButtonWidgetAbstractM
 
 	@Deprecated
 	@Override
-	public final void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
+	public final void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
 		GraphicsHolder.createInstanceSafe(context, graphicsHolder -> render(graphicsHolder, mouseX, mouseY, delta));
 	}
 

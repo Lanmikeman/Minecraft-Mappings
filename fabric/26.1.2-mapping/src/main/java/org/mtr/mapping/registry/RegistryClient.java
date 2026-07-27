@@ -1,12 +1,12 @@
 package org.mtr.mapping.registry;
 
-// TODO 26.1: BlockRenderLayerMap removed from fabric-api; use ChunkSectionLayer / custom pipeline
+// TODO 26.1: BlockRenderLayerMap removed
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.particle.v1.ParticleFactoryRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.BlockColorRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
+import net.fabricmc.fabric.api.networking.v1.PacketBuffers;
 import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
 import com.mojang.blaze3d.platform.InputConstants;
@@ -25,7 +25,7 @@ import java.util.function.Function;
 
 public final class RegistryClient extends DummyClass {
 
-	public static Function<Level, ? extends EntityExtension> worldRenderingEntity;
+	public static Function<World, ? extends EntityExtension> worldRenderingEntity;
 	public final EventRegistryClient eventRegistryClient = new EventRegistryClient();
 	private final Registry registry;
 	private final List<Runnable> objectsToRegister = new ArrayList<>();
@@ -51,18 +51,18 @@ public final class RegistryClient extends DummyClass {
 	}
 
 	@MappedMethod
-	public void registerParticleRenderer(ParticleTypeRegistryObject particleTypeRegistryObject, Function<SpriteSet, ParticleFactoryExtension> factory) {
-		ParticleFactoryRegistry.getInstance().register(particleTypeRegistryObject.get().data, spriteProvider -> factory.apply(new SpriteSet(spriteProvider)));
+	public void registerParticleRenderer(ParticleTypeRegistryObject particleTypeRegistryObject, Function<SpriteProvider, ParticleFactoryExtension> factory) {
+		ParticleFactoryRegistry.getInstance().register(particleTypeRegistryObject.get().data, spriteProvider -> factory.apply(new SpriteProvider(spriteProvider)));
 	}
 
 	@MappedMethod
 	public void registerBlockRenderType(RenderLayer renderLayer, BlockRegistryObject block) {
-		objectsToRegister.add(() -> BlockRenderLayerMap.INSTANCE.putBlock(block.get().data, renderLayer.data));
+		objectsToRegister.add(() -> { /* TODO 26.1: BlockRenderLayerMap removed */ });
 	}
 
 	@MappedMethod
-	public KeyMapping registerKeyBinding(String translationKey, int key, String categoryKey) {
-		return new KeyMapping(KeyMappingHelper.registerKeyBinding(new net.minecraft.client.KeyMapping(translationKey, InputConstants.Type.KEYSYM, key, categoryKey)));
+	public KeyBinding registerKeyBinding(String translationKey, int key, String categoryKey) {
+		return new KeyBinding(KeyMappingHelper.registerKeyMapping(new net.minecraft.client.KeyMapping(translationKey, InputConstants.Type.KEYSYM, key, categoryKey)));
 	}
 
 	@MappedMethod
@@ -71,7 +71,7 @@ public final class RegistryClient extends DummyClass {
 		for (int i = 0; i < blocks.length; i++) {
 			newBlocks[i] = blocks[i].get().data;
 		}
-		ColorProviderRegistry.BLOCK.register((blockState, blockRenderView, blockPos, tintIndex) -> blockColorProvider.getColor2(new BlockState(blockState), blockRenderView == null ? null : new BlockAndTintGetter(blockRenderView), blockPos == null ? null : new BlockPos(blockPos), tintIndex), newBlocks);
+		BlockColorRegistry.register((blockState, blockRenderView, blockPos, tintIndex) -> blockColorProvider.getColor2(new BlockState(blockState), blockRenderView == null ? null : new BlockRenderView(blockRenderView), blockPos == null ? null : new BlockPos(blockPos), tintIndex), newBlocks);
 	}
 
 	@MappedMethod
@@ -80,12 +80,12 @@ public final class RegistryClient extends DummyClass {
 		for (int i = 0; i < items.length; i++) {
 			newItems[i] = items[i].get().data;
 		}
-		ColorProviderRegistry.ITEM.register((itemStack, tintIndex) -> itemColorProvider.getColor2(new ItemStack(itemStack), tintIndex), newItems);
+		/* TODO 26.1 item colors */;
 	}
 
 	@MappedMethod
 	public void registerItemModelPredicate(ItemRegistryObject item, Identifier identifier, ModelPredicateProvider modelPredicateProvider) {
-		ItemProperties.register(item.get().data, identifier.data, (itemStack, clientWorld, livingEntity, seed) -> modelPredicateProvider.call(new ItemStack(itemStack), clientWorld == null ? null : new ClientLevel(clientWorld), livingEntity == null ? null : new LivingEntity(livingEntity)));
+		ItemProperties.register(item.get().data, identifier.data, (itemStack, clientWorld, livingEntity, seed) -> modelPredicateProvider.call(new ItemStack(itemStack), clientWorld == null ? null : new ClientWorld(clientWorld), livingEntity == null ? null : new LivingEntity(livingEntity)));
 	}
 
 	@MappedMethod
@@ -101,16 +101,16 @@ public final class RegistryClient extends DummyClass {
 	@MappedMethod
 	public <T extends PacketHandler> void sendPacketToServer(T data) {
 		if (registry.packetsIdentifier != null) {
-			final PacketBufferSender packetBufferSender = new PacketBufferSender(PacketByteBufs::create);
+			final PacketBufferSender packetBufferSender = new PacketBufferSender(PacketBuffers::create);
 			packetBufferSender.writeString(data.getClass().getName());
 			data.write(packetBufferSender);
-			packetBufferSender.send(byteBuf -> ClientPlayNetworking.send(registry.packetsIdentifier.data, byteBuf instanceof FriendlyByteBuf ? (FriendlyByteBuf) byteBuf : new FriendlyByteBuf(byteBuf)), Minecraft.getInstance()::execute);
+			packetBufferSender.send(byteBuf -> ClientPlayNetworking.send(registry.packetsIdentifier.data, byteBuf instanceof FriendlyByteBuf ? (FriendlyByteBuf) byteBuf : new FriendlyByteBuf(byteBuf)), MinecraftClient.getInstance()::execute);
 		}
 	}
 
 	@FunctionalInterface
 	public interface ModelPredicateProvider {
 		@MappedMethod
-		float call(ItemStack itemStack, @Nullable ClientLevel clientWorld, @Nullable LivingEntity livingEntity);
+		float call(ItemStack itemStack, @Nullable ClientWorld clientWorld, @Nullable LivingEntity livingEntity);
 	}
 }

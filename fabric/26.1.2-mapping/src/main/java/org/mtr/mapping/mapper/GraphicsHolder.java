@@ -1,8 +1,10 @@
 package org.mtr.mapping.mapper;
 
+import net.minecraft.client.gui.GuiGraphics;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -28,7 +30,7 @@ public final class GraphicsHolder extends DummyClass {
 
 	final PoseStack matrixStack;
 	final MultiBufferSource vertexConsumerProvider;
-	final DrawContext drawContext;
+	final GuiGraphics drawContext;
 
 	@MappedMethod
 	public static int getDefaultLight() {
@@ -41,7 +43,7 @@ public final class GraphicsHolder extends DummyClass {
 	}
 
 	@Deprecated
-	public static void createInstanceSafe(DrawContext drawContext, Consumer<GraphicsHolder> consumer) {
+	public static void createInstanceSafe(GuiGraphics drawContext, Consumer<GraphicsHolder> consumer) {
 		createInstanceSafe(new GraphicsHolder(drawContext), consumer);
 	}
 
@@ -64,9 +66,9 @@ public final class GraphicsHolder extends DummyClass {
 		push();
 	}
 
-	private GraphicsHolder(DrawContext drawContext) {
-		this.matrixStack = drawContext.getMatrices();
-		this.vertexConsumerProvider = drawContext.getVertexConsumers();
+	private GraphicsHolder(GuiGraphics drawContext) {
+		this.matrixStack = drawContext.pose();
+		this.vertexConsumerProvider = drawContext.bufferSource();
 		this.drawContext = drawContext;
 		push();
 	}
@@ -104,42 +106,42 @@ public final class GraphicsHolder extends DummyClass {
 	@MappedMethod
 	public void rotateXRadians(float angle) {
 		if (matrixStack != null) {
-			matrixStack.multiply(Axis.POSITIVE_X.rotation(angle));
+			matrixStack.multiply(RotationAxis.POSITIVE_X.rotation(angle));
 		}
 	}
 
 	@MappedMethod
 	public void rotateYRadians(float angle) {
 		if (matrixStack != null) {
-			matrixStack.multiply(Axis.POSITIVE_Y.rotation(angle));
+			matrixStack.multiply(RotationAxis.POSITIVE_Y.rotation(angle));
 		}
 	}
 
 	@MappedMethod
 	public void rotateZRadians(float angle) {
 		if (matrixStack != null) {
-			matrixStack.multiply(Axis.POSITIVE_Z.rotation(angle));
+			matrixStack.multiply(RotationAxis.POSITIVE_Z.rotation(angle));
 		}
 	}
 
 	@MappedMethod
 	public void rotateXDegrees(float angle) {
 		if (matrixStack != null) {
-			matrixStack.multiply(Axis.POSITIVE_X.rotationDegrees(angle));
+			matrixStack.multiply(RotationAxis.POSITIVE_X.rotationDegrees(angle));
 		}
 	}
 
 	@MappedMethod
 	public void rotateYDegrees(float angle) {
 		if (matrixStack != null) {
-			matrixStack.multiply(Axis.POSITIVE_Y.rotationDegrees(angle));
+			matrixStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(angle));
 		}
 	}
 
 	@MappedMethod
 	public void rotateZDegrees(float angle) {
 		if (matrixStack != null) {
-			matrixStack.multiply(Axis.POSITIVE_Z.rotationDegrees(angle));
+			matrixStack.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(angle));
 		}
 	}
 
@@ -149,10 +151,10 @@ public final class GraphicsHolder extends DummyClass {
 	}
 
 	@MappedMethod
-	public void drawText(MutableComponent mutableText, int x, int y, int color, boolean shadow, int light) {
+	public void drawText(MutableText mutableText, int x, int y, int color, boolean shadow, int light) {
 		if (matrixStack != null) {
-			final MultiBufferSource.Immediate immediate = drawContext == null ? MultiBufferSource.immediate(Tesselator.getInstance().getBuffer()) : drawContext.getVertexConsumers();
-			getInstance().textRenderer.draw(mutableText.data, x, y, color, shadow, matrixStack.peek().getPositionMatrix(), immediate, Font.TextLayerType.NORMAL, 0, light);
+			final MultiBufferSource.Immediate immediate = drawContext == null ? MultiBufferSource.immediate(Tessellator.getInstance().getBuffer()) : drawContext.bufferSource();
+			getInstance().textRenderer.draw(mutableText.data, x, y, color, shadow, matrixStack.peek().getPositionMatrix(), immediate, TextRenderer.TextLayerType.NORMAL, 0, light);
 			if (drawContext == null) {
 				immediate.draw();
 			} else {
@@ -162,10 +164,10 @@ public final class GraphicsHolder extends DummyClass {
 	}
 
 	@MappedMethod
-	public void drawText(FormattedCharSequence orderedText, int x, int y, int color, boolean shadow, int light) {
+	public void drawText(OrderedText orderedText, int x, int y, int color, boolean shadow, int light) {
 		if (matrixStack != null) {
-			final MultiBufferSource.Immediate immediate = drawContext == null ? MultiBufferSource.immediate(Tesselator.getInstance().getBuffer()) : drawContext.getVertexConsumers();
-			getInstance().textRenderer.draw(orderedText.data, x, y, color, shadow, matrixStack.peek().getPositionMatrix(), immediate, Font.TextLayerType.NORMAL, 0, light);
+			final MultiBufferSource.Immediate immediate = drawContext == null ? MultiBufferSource.immediate(Tessellator.getInstance().getBuffer()) : drawContext.bufferSource();
+			getInstance().textRenderer.draw(orderedText.data, x, y, color, shadow, matrixStack.peek().getPositionMatrix(), immediate, TextRenderer.TextLayerType.NORMAL, 0, light);
 			if (drawContext == null) {
 				immediate.draw();
 			} else {
@@ -177,8 +179,8 @@ public final class GraphicsHolder extends DummyClass {
 	@MappedMethod
 	public void drawText(String text, int x, int y, int color, boolean shadow, int light) {
 		if (matrixStack != null) {
-			final MultiBufferSource.Immediate immediate = drawContext == null ? MultiBufferSource.immediate(Tesselator.getInstance().getBuffer()) : drawContext.getVertexConsumers();
-			getInstance().textRenderer.draw(text, x, y, color, shadow, matrixStack.peek().getPositionMatrix(), immediate, Font.TextLayerType.NORMAL, 0, light);
+			final MultiBufferSource.Immediate immediate = drawContext == null ? MultiBufferSource.immediate(Tessellator.getInstance().getBuffer()) : drawContext.bufferSource();
+			getInstance().textRenderer.draw(text, x, y, color, shadow, matrixStack.peek().getPositionMatrix(), immediate, TextRenderer.TextLayerType.NORMAL, 0, light);
 			if (drawContext == null) {
 				immediate.draw();
 			} else {
@@ -195,19 +197,19 @@ public final class GraphicsHolder extends DummyClass {
 	}
 
 	@MappedMethod
-	public void drawCenteredText(MutableComponent text, int centerX, int y, int color) {
+	public void drawCenteredText(MutableText text, int centerX, int y, int color) {
 		if (drawContext != null) {
 			drawContext.drawCenteredTextWithShadow(getInstance().textRenderer, text.data, centerX, y, color);
 		}
 	}
 
 	@MappedMethod
-	public static int getTextWidth(MutableComponent mutableText) {
+	public static int getTextWidth(MutableText mutableText) {
 		return getInstance().textRenderer.getWidth(mutableText.data);
 	}
 
 	@MappedMethod
-	public static int getTextWidth(FormattedCharSequence orderedText) {
+	public static int getTextWidth(OrderedText orderedText) {
 		return getInstance().textRenderer.getWidth(orderedText.data);
 	}
 
@@ -217,12 +219,12 @@ public final class GraphicsHolder extends DummyClass {
 	}
 
 	@MappedMethod
-	public static List<FormattedCharSequence> wrapLines(MutableComponent mutableText, int width) {
-		return getInstance().textRenderer.wrapLines(mutableText.data, width).stream().map(FormattedCharSequence::new).collect(Collectors.toList());
+	public static List<OrderedText> wrapLines(MutableText mutableText, int width) {
+		return getInstance().textRenderer.wrapLines(mutableText.data, width).stream().map(OrderedText::new).collect(Collectors.toList());
 	}
 
-	private static Minecraft getInstance() {
-		return Minecraft.getInstance();
+	private static MinecraftClient getInstance() {
+		return MinecraftClient.getInstance();
 	}
 
 	/**

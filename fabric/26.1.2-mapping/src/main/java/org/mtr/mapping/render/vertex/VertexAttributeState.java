@@ -1,7 +1,6 @@
 package org.mtr.mapping.render.vertex;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.shaders.ShaderProgram;
 import org.lwjgl.opengl.GL33;
 import org.mtr.mapping.holder.Matrix4f;
 import org.mtr.mapping.holder.OverlayTexture;
@@ -107,7 +106,7 @@ public final class VertexAttributeState {
 						GL33.glVertexAttrib4f(vertexAttributeType.location + 2, floatBuffer.get(8), floatBuffer.get(9), floatBuffer.get(10), floatBuffer.get(11));
 						GL33.glVertexAttrib4f(vertexAttributeType.location + 3, floatBuffer.get(12), floatBuffer.get(13), floatBuffer.get(14), floatBuffer.get(15));
 					} else {
-						final ShaderProgram shaderProgram = RenderSystem.getShader();
+						final Object shaderProgram = RenderSystem.getShader();
 						if (shaderProgram != null && shaderProgram.modelViewMat != null) {
 							shaderProgram.modelViewMat.set(matrix4f.data);
 							shaderProgram.bind();

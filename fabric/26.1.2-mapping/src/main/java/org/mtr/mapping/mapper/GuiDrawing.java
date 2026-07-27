@@ -12,7 +12,7 @@ import org.mtr.mapping.tool.DummyClass;
 public final class GuiDrawing extends DummyClass {
 
 	private VertexConsumer vertexConsumer;
-	private DrawContext drawContext;
+	private GuiGraphics drawContext;
 	private BufferBuilder bufferBuilder;
 	private Matrix4f matrix;
 	private final GraphicsHolder graphicsHolder;
@@ -63,11 +63,11 @@ public final class GuiDrawing extends DummyClass {
 	@MappedMethod
 	public void beginDrawingTexture(Identifier identifier) {
 		matrix = graphicsHolder.matrixStack == null ? null : graphicsHolder.matrixStack.peek().getPositionMatrix();
-		bufferBuilder = Tesselator.getInstance().getBuffer();
+		bufferBuilder = Tessellator.getInstance().getBuffer();
 		RenderSystem.setShaderTexture(0, identifier.data);
 		RenderSystem.enableDepthTest();
 		RenderSystem.setShader(GameRenderer::getPositionTexProgram);
-		bufferBuilder.begin(VertexFormat.DrawMode.QUADS, DefaultVertexFormat.POSITION_TEXTURE);
+		bufferBuilder.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE);
 	}
 
 	@MappedMethod

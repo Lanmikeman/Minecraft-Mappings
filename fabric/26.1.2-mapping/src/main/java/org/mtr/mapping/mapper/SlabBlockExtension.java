@@ -25,8 +25,8 @@ public class SlabBlockExtension extends SlabBlockAbstractMapping implements Bloc
 
 	@Deprecated
 	@Override
-	public final void appendTooltip(net.minecraft.world.item.ItemStack stack, @Nullable net.minecraft.world.level.BlockGetter world, List<Component> tooltip, net.minecraft.world.item.Item$TooltipContext options) {
-		appendTooltipHelper(new ItemStack(stack), world == null ? null : new BlockGetter(world), tooltip, new TooltipContext(options));
+	public final void appendTooltip(net.minecraft.world.item.ItemStack stack, @Nullable net.minecraft.world.level.BlockGetter world, List<Text> tooltip, net.minecraft.world.item.Item$TooltipContext options) {
+		appendTooltipHelper(new ItemStack(stack), world == null ? null : new BlockView(world), tooltip, new TooltipContext(options));
 	}
 
 	@MappedMethod

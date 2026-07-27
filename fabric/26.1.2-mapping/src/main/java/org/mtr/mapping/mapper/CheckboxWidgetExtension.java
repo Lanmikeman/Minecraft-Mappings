@@ -1,6 +1,6 @@
 package org.mtr.mapping.mapper;
 
-import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.GuiGraphics;
 import org.mtr.mapping.annotation.MappedMethod;
 import org.mtr.mapping.holder.*;
 
@@ -21,8 +21,8 @@ public class CheckboxWidgetExtension extends CheckboxWidgetAbstractMapping {
 	}
 
 	@MappedMethod
-	public CheckboxWidgetExtension(int x, int y, int width, int height, MutableComponent message, boolean showMessage, Consumer<Boolean> onPress) {
-		super(x, y, new Component((showMessage ? message.data : net.minecraft.text.Text.empty())), new Font(Minecraft.getInstance().data.textRenderer), false, Callback.EMPTY);
+	public CheckboxWidgetExtension(int x, int y, int width, int height, MutableText message, boolean showMessage, Consumer<Boolean> onPress) {
+		super(x, y, new Text((showMessage ? message.data : net.minecraft.text.Text.empty())), new TextRenderer(MinecraftClient.getInstance().data.textRenderer), false, Callback.EMPTY);
 		this.width = width;
 		this.height = height;
 		this.onPress = onPress;
@@ -37,7 +37,7 @@ public class CheckboxWidgetExtension extends CheckboxWidgetAbstractMapping {
 
 	@Deprecated
 	@Override
-	public final void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
+	public final void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
 		GraphicsHolder.createInstanceSafe(context, graphicsHolder -> render(graphicsHolder, mouseX, mouseY, delta));
 	}
 

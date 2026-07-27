@@ -15,11 +15,11 @@ public class BlockItemExtension extends BlockItemAbstractMapping {
 	@Deprecated
 	@Override
 	public final TypedActionResult<ItemStack> use(net.minecraft.world.level.Level world, net.minecraft.world.entity.player.Player user, net.minecraft.world.InteractionHand hand) {
-		useWithoutResult(new Level(world), new Player(user), InteractionHand.convert(hand));
+		useWithoutResult(new World(world), new PlayerEntity(user), Hand.convert(hand));
 		return super.use(world, user, hand);
 	}
 
 	@MappedMethod
-	public void useWithoutResult(Level world, Player user, InteractionHand hand) {
+	public void useWithoutResult(World world, PlayerEntity user, Hand hand) {
 	}
 }

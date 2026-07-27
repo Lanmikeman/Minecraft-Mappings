@@ -1,13 +1,15 @@
 package org.mtr.mapping.mapper;
 
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.world.phys.Vec3;
 import org.mtr.mapping.annotation.MappedMethod;
 import org.mtr.mapping.holder.Vector3d;
 
-public abstract class BlockEntityRenderer<T extends BlockEntityExtension> implements net.minecraft.client.renderer.blockentity.BlockEntityRenderer<T> {
+public abstract class BlockEntityRenderer<T extends BlockEntityExtension> implements net.minecraft.client.renderer.blockentity.BlockEntityRenderer<T, BlockEntityRenderState> {
 
 	@MappedMethod
 	public BlockEntityRenderer(Argument argument) {
@@ -15,8 +17,14 @@ public abstract class BlockEntityRenderer<T extends BlockEntityExtension> implem
 
 	@Deprecated
 	@Override
-	public final void render(T entity, float tickDelta, PoseStack matrices, MultiBufferSource vertexConsumers, int light, int overlay) {
-		GraphicsHolder.createInstanceSafe(matrices, vertexConsumers, graphicsHolder -> render(entity, tickDelta, graphicsHolder, light, overlay));
+	public BlockEntityRenderState createRenderState() {
+		return new BlockEntityRenderState();
+	}
+
+	@Deprecated
+	@Override
+	public void submit(BlockEntityRenderState state, PoseStack matrices, SubmitNodeCollector queue, CameraRenderState camera) {
+		// TODO 26.1: bridge to GraphicsHolder-based render(entity, ...)
 	}
 
 	@MappedMethod
@@ -24,41 +32,22 @@ public abstract class BlockEntityRenderer<T extends BlockEntityExtension> implem
 
 	@MappedMethod
 	public boolean rendersOutsideBoundingBox2(T blockEntity) {
-		return net.minecraft.client.renderer.blockentity.BlockEntityRenderer.super.rendersOutsideBoundingBox(blockEntity);
-	}
-
-	@Deprecated
-	@Override
-	public final boolean rendersOutsideBoundingBox(T blockEntity) {
-		return rendersOutsideBoundingBox2(blockEntity);
+		return shouldRenderOffScreen();
 	}
 
 	@MappedMethod
 	public int getRenderDistance2() {
-		return net.minecraft.client.renderer.blockentity.BlockEntityRenderer.super.getRenderDistance();
-	}
-
-	@Deprecated
-	@Override
-	public final int getRenderDistance() {
-		return getRenderDistance2();
+		return getViewDistance();
 	}
 
 	@MappedMethod
 	public boolean isInRenderDistance(T blockEntity, Vector3d position) {
-		return net.minecraft.client.renderer.blockentity.BlockEntityRenderer.super.isInRenderDistance(blockEntity, position.data);
-	}
-
-	@Deprecated
-	@Override
-	public final boolean isInRenderDistance(T blockEntity, Vec3 position) {
-		return isInRenderDistance(blockEntity, new Vector3d(position));
+		return shouldRender(blockEntity, position.data);
 	}
 
 	@Deprecated
 	public static final class Argument {
-
-		private final BlockEntityRendererProvider.Context data;
+		final BlockEntityRendererProvider.Context data;
 
 		public Argument(BlockEntityRendererProvider.Context data) {
 			this.data = data;

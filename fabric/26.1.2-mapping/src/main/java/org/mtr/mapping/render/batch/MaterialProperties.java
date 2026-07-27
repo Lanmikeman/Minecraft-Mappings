@@ -1,6 +1,6 @@
 package org.mtr.mapping.render.batch;
 
-import com.mojang.blaze3d.opengl.GlStateManager;
+import com.mojang.blaze3d.opengl.GlStateDefinition;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.util.Util;
 import org.lwjgl.opengl.GL33;
@@ -46,7 +46,7 @@ public final class MaterialProperties {
 
 	private static final Function<Identifier, RenderLayer> ENTITY_TRANSLUCENT_CULL = Util.memoize((texture) -> RenderLayerHelper.createTriangles(
 			"entity_translucent_cull_triangles",
-			DefaultVertexFormat.getPositionColorTextureOverlayLightNormalMapped(),
+			VertexFormats.getPositionColorTextureOverlayLightNormalMapped(),
 			256,
 			true,
 			true,
@@ -54,7 +54,7 @@ public final class MaterialProperties {
 	));
 	private static final BiFunction<Identifier, Boolean, RenderLayer> BEACON_BEAM = Util.memoize((texture, translucent) -> RenderLayerHelper.createTriangles(
 			"beacon_beam_triangles",
-			DefaultVertexFormat.getPositionColorTextureOverlayLightNormalMapped(),
+			VertexFormats.getPositionColorTextureOverlayLightNormalMapped(),
 			256,
 			false,
 			translucent,
@@ -62,7 +62,7 @@ public final class MaterialProperties {
 	));
 	private static final Function<Identifier, RenderLayer> ENTITY_CUTOUT = Util.memoize((texture) -> RenderLayerHelper.createTriangles(
 			"entity_cutout_triangles",
-			DefaultVertexFormat.getPositionColorTextureOverlayLightNormalMapped(),
+			VertexFormats.getPositionColorTextureOverlayLightNormalMapped(),
 			256,
 			true,
 			false,
@@ -118,7 +118,7 @@ public final class MaterialProperties {
 		// HACK: To make cutout transparency on beacon_beam work
 		if (translucent || cutoutHack) {
 			RenderSystem.enableBlend(); // TransparentState
-			RenderSystem.blendFuncSeparate(GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SrcFactor.ONE, GlStateManager.DstFactor.ONE_MINUS_SRC_ALPHA);
+			RenderSystem.blendFuncSeparate(GlStateDefinition.SrcFactor.SRC_ALPHA, GlStateDefinition.DstFactor.ONE_MINUS_SRC_ALPHA, GlStateDefinition.SrcFactor.ONE, GlStateDefinition.DstFactor.ONE_MINUS_SRC_ALPHA);
 		} else {
 			RenderSystem.disableBlend();
 		}
@@ -126,8 +126,8 @@ public final class MaterialProperties {
 		RenderSystem.enableDepthTest(); // DepthTestState
 		RenderSystem.depthFunc(GL33.GL_LEQUAL);
 		RenderSystem.enableCull();
-		Minecraft.getInstance().getGameRendererMapped().getLightmapTextureManager().enable(); // LightmapState
-		Minecraft.getInstance().getGameRendererMapped().getOverlayTexture().setupOverlayColor(); // OverlayState
+		MinecraftClient.getInstance().getGameRendererMapped().getLightmapTextureManager().enable(); // LightmapState
+		MinecraftClient.getInstance().getGameRendererMapped().getOverlayTexture().setupOverlayColor(); // OverlayState
 		RenderSystem.depthMask(writeDepthBuf); // WriteMaskState
 	}
 

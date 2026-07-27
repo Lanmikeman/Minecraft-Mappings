@@ -16,14 +16,14 @@ public abstract class BlockEntityExtension extends BlockEntityAbstractMapping {
 
 	@Deprecated
 	@Override
-	protected final void writeNbt(CompoundTag nbt) {
+	protected final void writeNbt(NbtCompound nbt) {
 		super.writeNbt(nbt);
 		writeCompoundTag(new CompoundTag(nbt));
 	}
 
 	@Deprecated
 	@Override
-	public final void readNbt(CompoundTag nbt) {
+	public final void readNbt(NbtCompound nbt) {
 		super.readNbt(nbt);
 		readCompoundTag(new CompoundTag(nbt));
 	}
@@ -38,13 +38,13 @@ public abstract class BlockEntityExtension extends BlockEntityAbstractMapping {
 
 	@Deprecated
 	@Override
-	public final Packet<ClientGamePacketListener> toUpdatePacket() {
-		return ClientboundBlockEntityDataPacket.create(this);
+	public final Packet<ClientPlayPacketListener> toUpdatePacket() {
+		return BlockEntityUpdateS2CPacket.create(this);
 	}
 
 	@Deprecated
 	@Override
-	public final CompoundTag toInitialChunkDataNbt() {
+	public final NbtCompound toInitialChunkDataNbt() {
 		return createNbt();
 	}
 

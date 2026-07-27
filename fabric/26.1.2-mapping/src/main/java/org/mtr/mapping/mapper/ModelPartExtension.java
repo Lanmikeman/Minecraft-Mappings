@@ -1,4 +1,7 @@
 package org.mtr.mapping.mapper;
+import net.minecraft.client.model.geom.builders.CubeDeformation;
+import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.PartDefinition;
 
 import net.minecraft.client.model.*;
 import org.mtr.mapping.annotation.MappedMethod;
@@ -14,17 +17,17 @@ public final class ModelPartExtension extends DummyClass {
 	private float tempPivotX, tempPivotY, tempPivotZ;
 	private float tempRotationX, tempRotationY, tempRotationZ;
 	private int tempU, tempV;
-	private ModelPartData modelPartData;
+	private PartDefinition modelPartData;
 	private boolean childAdded = false;
 
 	private final List<String> nameTree = new ArrayList<>();
 
-	ModelPartExtension(ModelPartData modelPartData) {
+	ModelPartExtension(PartDefinition modelPartData) {
 		nameTree.add(getRandomPartName());
 		this.modelPartData = modelPartData;
 	}
 
-	private ModelPartExtension(String name, ModelPartData modelPartData) {
+	private ModelPartExtension(String name, PartDefinition modelPartData) {
 		nameTree.add(name);
 		this.modelPartData = modelPartData;
 	}
@@ -63,7 +66,7 @@ public final class ModelPartExtension extends DummyClass {
 	public void addCuboid(float x, float y, float z, int sizeX, int sizeY, int sizeZ, float inflation, boolean mirrored) {
 		setChild();
 		final String name = getRandomPartName();
-		final ModelPartBuilder modelPartBuilder = ModelPartBuilder.create().mirrored(mirrored).cuboid(name, x, y, z, sizeX, sizeY, sizeZ, new Dilation(inflation), tempU, tempV);
+		final ModelPartBuilder modelPartBuilder = ModelPartBuilder.create().mirrored(mirrored).cuboid(name, x, y, z, sizeX, sizeY, sizeZ, new CubeDeformation(inflation), tempU, tempV);
 		modelPartData.addChild(name, modelPartBuilder, getModelTransform());
 	}
 
@@ -98,7 +101,7 @@ public final class ModelPartExtension extends DummyClass {
 
 	private void setChild() {
 		if (!childAdded) {
-			modelPartData = modelPartData.addChild(getLastName(), ModelPartBuilder.create(), ModelTransform.of(0, 0, 0, 0, 0, 0));
+			modelPartData = modelPartData.addChild(getLastName(), ModelPartBuilder.create(), PartPose.of(0, 0, 0, 0, 0, 0));
 			childAdded = true;
 		}
 	}
@@ -107,8 +110,8 @@ public final class ModelPartExtension extends DummyClass {
 		return nameTree.isEmpty() ? "" : nameTree.get(nameTree.size() - 1);
 	}
 
-	private ModelTransform getModelTransform() {
-		return ModelTransform.of(tempPivotX, tempPivotY, tempPivotZ, tempRotationX, tempRotationY, tempRotationZ);
+	private PartPose getModelTransform() {
+		return PartPose.of(tempPivotX, tempPivotY, tempPivotZ, tempRotationX, tempRotationY, tempRotationZ);
 	}
 
 	private static String getRandomPartName() {

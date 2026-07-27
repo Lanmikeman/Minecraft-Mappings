@@ -1,6 +1,6 @@
 package org.mtr.mapping.mapper;
 
-import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.GuiGraphics;
 import org.mtr.mapping.annotation.MappedMethod;
 import org.mtr.mapping.holder.MutableText;
 import org.mtr.mapping.holder.SliderWidgetAbstractMapping;
@@ -19,8 +19,8 @@ public abstract class SliderWidgetExtension extends SliderWidgetAbstractMapping 
 	}
 
 	@MappedMethod
-	public SliderWidgetExtension(int x, int y, int width, int height, MutableComponent message) {
-		super(x, y, width, height, new Component(message.data), 0);
+	public SliderWidgetExtension(int x, int y, int width, int height, MutableText message) {
+		super(x, y, width, height, new Text(message.data), 0);
 	}
 
 	@MappedMethod
@@ -32,7 +32,7 @@ public abstract class SliderWidgetExtension extends SliderWidgetAbstractMapping 
 
 	@Deprecated
 	@Override
-	public final void renderWidget(DrawContext drawContext, int mouseX, int mouseY, float delta) {
+	public final void renderWidget(GuiGraphics drawContext, int mouseX, int mouseY, float delta) {
 		GraphicsHolder.createInstanceSafe(drawContext, graphicsHolder -> render(graphicsHolder, mouseX, mouseY, delta));
 	}
 

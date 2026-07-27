@@ -20,8 +20,8 @@ public class ScreenExtension extends ScreenAbstractMapping {
 	}
 
 	@MappedMethod
-	protected ScreenExtension(MutableComponent title) {
-		super(new Component(title.data));
+	protected ScreenExtension(MutableText title) {
+		super(new Text(title.data));
 	}
 
 	@MappedMethod
@@ -33,7 +33,7 @@ public class ScreenExtension extends ScreenAbstractMapping {
 
 	@Deprecated
 	@Override
-	public final void render(DrawContext context, int mouseX, int mouseY, float delta) {
+	public final void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
 		GraphicsHolder.createInstanceSafe(context, graphicsHolder -> render(graphicsHolder, mouseX, mouseY, delta));
 	}
 
@@ -46,16 +46,16 @@ public class ScreenExtension extends ScreenAbstractMapping {
 
 	@Deprecated
 	@Override
-	public final void renderBackground(DrawContext context, int mouseX, int mouseY, float delta) {
+	public final void renderBackground(GuiGraphics context, int mouseX, int mouseY, float delta) {
 	}
 
 	@MappedMethod
-	public final void addChild(AbstractWidget child) {
+	public final void addChild(ClickableWidget child) {
 		addDrawableChild(child.data);
 	}
 
 	@MappedMethod
-	public final void addSelectableChild(AbstractWidget child) {
+	public final void addSelectableChild(ClickableWidget child) {
 		addSelectableChild(child.data);
 	}
 

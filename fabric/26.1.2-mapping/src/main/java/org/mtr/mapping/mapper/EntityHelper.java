@@ -37,7 +37,7 @@ public final class EntityHelper extends DummyClass {
 	}
 
 	@MappedMethod
-	public static void spawnItem(ServerLevel serverWorld, BlockPos blockPos, ItemStack itemStack) {
+	public static void spawnItem(ServerWorld serverWorld, BlockPos blockPos, ItemStack itemStack) {
 		serverWorld.data.spawnEntity(new ItemEntity(serverWorld.data, blockPos.getX() + 0.5, blockPos.getY() + 0.5, blockPos.getZ() + 0.5, itemStack.data));
 	}
 }

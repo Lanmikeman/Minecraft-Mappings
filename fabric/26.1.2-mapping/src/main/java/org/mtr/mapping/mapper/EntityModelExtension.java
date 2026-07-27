@@ -1,4 +1,7 @@
 package org.mtr.mapping.mapper;
+import net.minecraft.client.model.geom.builders.PartDefinition;
+import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.LayerDefinition;
 
 import net.minecraft.client.model.ModelData;
 import net.minecraft.client.model.geom.ModelPart;
@@ -20,8 +23,8 @@ public abstract class EntityModelExtension<T extends EntityAbstractMapping> exte
 
 	private final int textureWidth;
 	private final int textureHeight;
-	private final ModelData modelData = new ModelData();
-	private final ModelPartData modelPartData = modelData.getRoot();
+	private final MeshDefinition modelData = new MeshDefinition();
+	private final PartDefinition modelPartData = modelData.getRoot();
 	private final List<ModelPartExtension> modelPartExtensions = new ArrayList<>();
 
 	@MappedMethod
@@ -53,7 +56,7 @@ public abstract class EntityModelExtension<T extends EntityAbstractMapping> exte
 
 	@MappedMethod
 	public final void buildModel() {
-		final ModelPart modelPart = TexturedModelData.of(modelData, textureWidth, textureHeight).createModel();
+		final ModelPart modelPart = LayerDefinition.of(modelData, textureWidth, textureHeight).createModel();
 		modelPartExtensions.forEach(modelPartExtension -> modelPartExtension.setModelPart(modelPart));
 	}
 }

@@ -1,7 +1,6 @@
 package org.mtr.mapping.render.tool;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.shaders.ShaderProgram;
 import org.lwjgl.opengl.GL33;
 import org.mtr.mapping.tool.DummyClass;
 
@@ -30,7 +29,7 @@ public final class GlStateTracker {
 	private static int blendDstAlpha;
 	private static int blendEquationRgb;
 	private static int blendEquationAlpha;
-	private static ShaderProgram currentShaderProgram;
+	private static Object currentShaderProgram;
 	private static boolean isStateProtected;
 
 	public static void capture() {

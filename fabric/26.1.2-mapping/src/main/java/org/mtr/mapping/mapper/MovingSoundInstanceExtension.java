@@ -31,8 +31,8 @@ public abstract class MovingSoundInstanceExtension extends MovingSoundInstanceAb
 	}
 
 	@MappedMethod
-	protected MovingSoundInstanceExtension(SoundEvent sound, SoundSource category) {
-		super(sound, category, new Random(net.minecraft.world.phys.random.Random.create()));
+	protected MovingSoundInstanceExtension(SoundEvent sound, SoundCategory category) {
+		super(sound, category, new Random(net.minecraft.util.math.random.Random.create()));
 	}
 
 	@MappedMethod

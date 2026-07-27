@@ -99,7 +99,7 @@ public final class OptimizedModel extends DummyClass {
 					final PoseStack matrixStack = new PoseStack();
 					matrixStack.translate(x, y, z);
 					if (flipped) {
-						matrixStack.multiply(Axis.POSITIVE_Y.rotationDegrees(180));
+						matrixStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(180));
 					}
 					modelPart.modelPart.render(matrixStack, capturingVertexConsumer, light, OverlayTexture.getDefaultUvMapped());
 				});

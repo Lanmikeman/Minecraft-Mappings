@@ -10,27 +10,27 @@ import java.util.function.Predicate;
 public final class MinecraftServerHelper extends DummyClass {
 
 	@MappedMethod
-	public static void iterateWorlds(MinecraftServer minecraftServer, Consumer<ServerLevel> consumer) {
-		minecraftServer.data.getWorlds().forEach(serverWorld -> consumer.accept(new ServerLevel(serverWorld)));
+	public static void iterateWorlds(MinecraftServer minecraftServer, Consumer<ServerWorld> consumer) {
+		minecraftServer.data.getWorlds().forEach(serverWorld -> consumer.accept(new ServerWorld(serverWorld)));
 	}
 
 	@MappedMethod
-	public static void iteratePlayers(MinecraftServer minecraftServer, Consumer<ServerPlayer> consumer) {
-		minecraftServer.data.getPlayerManager().getPlayerList().forEach(serverPlayerEntity -> consumer.accept(new ServerPlayer(serverPlayerEntity)));
+	public static void iteratePlayers(MinecraftServer minecraftServer, Consumer<ServerPlayerEntity> consumer) {
+		minecraftServer.data.getPlayerManager().getPlayerList().forEach(serverPlayerEntity -> consumer.accept(new ServerPlayerEntity(serverPlayerEntity)));
 	}
 
 	@MappedMethod
-	public static void iteratePlayers(ServerLevel serverWorld, Consumer<ServerPlayer> consumer) {
-		serverWorld.data.getPlayers().forEach(serverPlayerEntity -> consumer.accept(new ServerPlayer(serverPlayerEntity)));
+	public static void iteratePlayers(ServerWorld serverWorld, Consumer<ServerPlayerEntity> consumer) {
+		serverWorld.data.getPlayers().forEach(serverPlayerEntity -> consumer.accept(new ServerPlayerEntity(serverPlayerEntity)));
 	}
 
 	@MappedMethod
-	public static void iteratePlayers(ServerLevel serverWorld, Predicate<ServerPlayer> predicate, Consumer<ServerPlayer> consumer) {
-		serverWorld.data.getPlayers(serverPlayerEntity -> predicate.test(new ServerPlayer(serverPlayerEntity))).forEach(serverPlayerEntity -> consumer.accept(new ServerPlayer(serverPlayerEntity)));
+	public static void iteratePlayers(ServerWorld serverWorld, Predicate<ServerPlayerEntity> predicate, Consumer<ServerPlayerEntity> consumer) {
+		serverWorld.data.getPlayers(serverPlayerEntity -> predicate.test(new ServerPlayerEntity(serverPlayerEntity))).forEach(serverPlayerEntity -> consumer.accept(new ServerPlayerEntity(serverPlayerEntity)));
 	}
 
 	@MappedMethod
-	public static Identifier getWorldId(Level world) {
-		return new Identifier(world.data.getResourceKey().getValue());
+	public static Identifier getWorldId(World world) {
+		return new Identifier(world.data.getRegistryKey().getValue());
 	}
 }

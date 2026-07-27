@@ -1,6 +1,6 @@
 package org.mtr.mapping.mapper;
 
-import net.minecraft.inventory.Inventories;
+import net.minecraft.world.ContainerHelper;
 import org.mtr.mapping.annotation.MappedMethod;
 import org.mtr.mapping.holder.Inventory;
 import org.mtr.mapping.holder.ItemStack;
@@ -13,21 +13,21 @@ public final class InventoryHelper {
 
 	@MappedMethod
 	public static ItemStack splitStack(List<ItemStack> stacks, int slot, int amount) {
-		return new ItemStack(Inventories.splitStack(HolderBase.convertCollection(stacks), slot, amount));
+		return new ItemStack(ContainerHelper.splitStack(HolderBase.convertCollection(stacks), slot, amount));
 	}
 
 	@MappedMethod
 	public static ItemStack removeStack(List<ItemStack> stacks, int slot) {
-		return new ItemStack(Inventories.removeStack(HolderBase.convertCollection(stacks), slot));
+		return new ItemStack(ContainerHelper.removeStack(HolderBase.convertCollection(stacks), slot));
 	}
 
 	@MappedMethod
 	public static int remove(Inventory inventory, Predicate<ItemStack> shouldRemove, int maxCount, boolean dryRun) {
-		return Inventories.remove(inventory.data, itemStack -> shouldRemove.test(new ItemStack(itemStack)), maxCount, dryRun);
+		return ContainerHelper.remove(inventory.data, itemStack -> shouldRemove.test(new ItemStack(itemStack)), maxCount, dryRun);
 	}
 
 	@MappedMethod
 	public static int remove(ItemStack stack, Predicate<ItemStack> shouldRemove, int maxCount, boolean dryRun) {
-		return Inventories.remove(stack.data, itemStack -> shouldRemove.test(new ItemStack(itemStack)), maxCount, dryRun);
+		return ContainerHelper.remove(stack.data, itemStack -> shouldRemove.test(new ItemStack(itemStack)), maxCount, dryRun);
 	}
 }

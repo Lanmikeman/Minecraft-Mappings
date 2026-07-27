@@ -7,19 +7,19 @@ import org.mtr.mapping.tool.RegistryObject;
 
 import java.util.function.Consumer;
 
-public final class ParticleTypeRegistryObject extends RegistryObject<SimpleParticleType> {
+public final class ParticleTypeRegistryObject extends RegistryObject<DefaultParticleType> {
 
 	final Identifier identifier;
-	private final SimpleParticleType defaultParticleType;
+	private final DefaultParticleType defaultParticleType;
 
-	ParticleTypeRegistryObject(SimpleParticleType defaultParticleType, Identifier identifier) {
+	ParticleTypeRegistryObject(DefaultParticleType defaultParticleType, Identifier identifier) {
 		this.identifier = identifier;
 		this.defaultParticleType = defaultParticleType;
 	}
 
 	@MappedMethod
 	@Override
-	public SimpleParticleType get() {
+	public DefaultParticleType get() {
 		return defaultParticleType;
 	}
 
@@ -31,7 +31,7 @@ public final class ParticleTypeRegistryObject extends RegistryObject<SimpleParti
 
 	@MappedMethod
 	@Override
-	public void ifPresent(Consumer<SimpleParticleType> consumer) {
+	public void ifPresent(Consumer<DefaultParticleType> consumer) {
 		consumer.accept(defaultParticleType);
 	}
 }

@@ -21,7 +21,7 @@ public interface BlockWithEntity extends EntityBlock {
 
 	@Deprecated
 	@Override
-	default <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level world, net.minecraft.world.level.block.state.BlockState state, net.minecraft.world.level.block.entity.BlockEntityType<T> type) {
+	default <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, net.minecraft.world.level.block.state.BlockState state, net.minecraft.world.level.block.entity.BlockEntityType<T> type) {
 		return (world1, pos, state1, blockEntity) -> {
 			if (blockEntity.getType() == type && blockEntity instanceof BlockEntityExtension) {
 				((BlockEntityExtension) blockEntity).blockEntityTick();

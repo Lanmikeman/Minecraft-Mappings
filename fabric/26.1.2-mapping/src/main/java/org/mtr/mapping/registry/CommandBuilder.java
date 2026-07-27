@@ -33,14 +33,14 @@ public final class CommandBuilder<T extends ArgumentBuilder<CommandSourceStack, 
 
 	@MappedMethod
 	public <U> void then(String argumentName, ArgumentType<U> argumentType, Consumer<CommandBuilder<?>> consumer) {
-		final CommandBuilder<RequiredArgumentBuilder<CommandSourceStack, U>> commandBuilder = new CommandBuilder<>(Commands.argument(argumentName, argumentType));
+		final CommandBuilder<RequiredArgumentBuilder<CommandSourceStack, U>> commandBuilder = new CommandBuilder<>(CommandManager.argument(argumentName, argumentType));
 		consumer.accept(commandBuilder);
 		argumentBuilder = argumentBuilder.then(commandBuilder.argumentBuilder);
 	}
 
 	@MappedMethod
 	public void then(String commandName, Consumer<CommandBuilder<?>> consumer) {
-		final CommandBuilder<LiteralArgumentBuilder<CommandSourceStack>> commandBuilder = new CommandBuilder<>(Commands.literal(commandName));
+		final CommandBuilder<LiteralArgumentBuilder<CommandSourceStack>> commandBuilder = new CommandBuilder<>(CommandManager.literal(commandName));
 		consumer.accept(commandBuilder);
 		argumentBuilder = argumentBuilder.then(commandBuilder.argumentBuilder);
 	}
@@ -90,12 +90,12 @@ public final class CommandBuilder<T extends ArgumentBuilder<CommandSourceStack, 
 
 		@MappedMethod
 		public void sendSuccess(String message, boolean broadcastToOps, Object... translatableArguments) {
-			context.getSource().sendFeedback(() -> Component.translatable(message, translatableArguments), broadcastToOps);
+			context.getSource().sendFeedback(() -> Text.translatable(message, translatableArguments), broadcastToOps);
 		}
 
 		@MappedMethod
 		public void sendFailure(String message, Object... translatableArguments) {
-			context.getSource().sendError(Component.translatable(message, translatableArguments));
+			context.getSource().sendError(Text.translatable(message, translatableArguments));
 		}
 
 		@MappedMethod
@@ -104,15 +104,15 @@ public final class CommandBuilder<T extends ArgumentBuilder<CommandSourceStack, 
 		}
 
 		@MappedMethod
-		public Level getWorld() {
-			return new Level(context.getSource().getWorld());
+		public World getWorld() {
+			return new World(context.getSource().getWorld());
 		}
 
 		@MappedMethod
 		@Nullable
-		public ServerPlayer getServerPlayer() {
+		public ServerPlayerEntity getServerPlayer() {
 			final net.minecraft.server.level.ServerPlayer serverPlayerEntity = context.getSource().getPlayer();
-			return serverPlayerEntity == null ? null : new ServerPlayer(serverPlayerEntity);
+			return serverPlayerEntity == null ? null : new ServerPlayerEntity(serverPlayerEntity);
 		}
 	}
 }

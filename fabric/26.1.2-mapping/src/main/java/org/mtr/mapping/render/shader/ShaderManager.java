@@ -1,8 +1,9 @@
 package org.mtr.mapping.render.shader;
 
+import net.minecraft.server.packs.resources.ResourceProvider;
+
 import com.google.common.collect.ImmutableMap;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.shaders.ShaderProgram;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormatElement;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
@@ -19,18 +20,18 @@ import java.util.Map;
 
 public final class ShaderManager {
 
-	private final Map<String, ShaderProgram> shaders = new HashMap<>();
+	private final Map<String, Object> shaders = new HashMap<>();
 
 	private static final VertexFormatElement MINECRAFT_ELEMENT_MATRIX = new VertexFormatElement(0, VertexFormatElement.ComponentType.FLOAT, VertexFormatElement.Type.GENERIC, 16);
 	private static final VertexFormat MINECRAFT_VERTEX_FORMAT_BLOCK = new VertexFormat(ImmutableMap.<String, VertexFormatElement>builder()
-			.put("Position", DefaultVertexFormat.POSITION_ELEMENT)
-			.put("Color", DefaultVertexFormat.COLOR_ELEMENT)
-			.put("UV0", DefaultVertexFormat.UV_ELEMENT)
-			.put("UV1", DefaultVertexFormat.OVERLAY_ELEMENT)
-			.put("UV2", DefaultVertexFormat.LIGHT_ELEMENT)
-			.put("Normal", DefaultVertexFormat.NORMAL_ELEMENT)
+			.put("Position", VertexFormats.POSITION_ELEMENT)
+			.put("Color", VertexFormats.COLOR_ELEMENT)
+			.put("UV0", VertexFormats.UV_ELEMENT)
+			.put("UV1", VertexFormats.OVERLAY_ELEMENT)
+			.put("UV2", VertexFormats.LIGHT_ELEMENT)
+			.put("Normal", VertexFormats.NORMAL_ELEMENT)
 			.put("ModelMat", MINECRAFT_ELEMENT_MATRIX)
-			.put("Padding", DefaultVertexFormat.PADDING_ELEMENT)
+			.put("Padding", VertexFormats.PADDING_ELEMENT)
 			.build());
 
 	public boolean isReady() {
@@ -38,9 +39,9 @@ public final class ShaderManager {
 	}
 
 	public void reloadShaders() {
-		shaders.values().forEach(ShaderProgram::close);
+		shaders.values().forEach(Object::close);
 		shaders.clear();
-		final PatchingResourceProvider patchingResourceProvider = new PatchingResourceProvider(Minecraft.getInstance().getResourceManager());
+		final PatchingResourceProvider patchingResourceProvider = new PatchingResourceProvider(MinecraftClient.getInstance().getResourceManager());
 		loadShader(patchingResourceProvider, getShaderName(OptimizedModel.ShaderType.CUTOUT));
 		loadShader(patchingResourceProvider, getShaderName(OptimizedModel.ShaderType.TRANSLUCENT));
 		loadShader(patchingResourceProvider, getShaderName(OptimizedModel.ShaderType.CUTOUT_GLOWING));
@@ -48,14 +49,14 @@ public final class ShaderManager {
 
 	private void loadShader(PatchingResourceProvider resourceManager, String shaderName) {
 		try {
-			shaders.put(shaderName, new ShaderProgram(resourceManager, shaderName, MINECRAFT_VERTEX_FORMAT_BLOCK));
+			shaders.put(shaderName, new Object(resourceManager, shaderName, MINECRAFT_VERTEX_FORMAT_BLOCK));
 		} catch (Exception e) {
 			DummyClass.logException(e);
 		}
 	}
 
 	public void setupShaderBatchState(MaterialProperties materialProperties) {
-		final ShaderProgram shaderProgram;
+		final Object shaderProgram;
 		if (Utilities.canUseCustomShader()) {
 			shaderProgram = shaders.get(getShaderName(materialProperties.shaderType));
 			materialProperties.setupCompositeState();
@@ -102,7 +103,7 @@ public final class ShaderManager {
 			shaderProgram.gameTime.set(RenderSystem.getShaderGameTime());
 		}
 		if (shaderProgram.screenSize != null) {
-			final Window window = Minecraft.getInstance().getWindow();
+			final Window window = MinecraftClient.getInstance().getWindow();
 			shaderProgram.screenSize.set(window.getWidth(), window.getHeight());
 		}
 
@@ -112,7 +113,7 @@ public final class ShaderManager {
 
 	public void cleanupShaderBatchState() {
 		if (!Utilities.canUseCustomShader()) {
-			final ShaderProgram shaderProgram = RenderSystem.getShader();
+			final Object shaderProgram = RenderSystem.getShader();
 			if (shaderProgram != null && shaderProgram.modelViewMat != null) {
 				// ModelViewMatrix might have got set in VertexAttributeState, reset it
 				shaderProgram.modelViewMat.set(RenderSystem.getModelViewMatrix());

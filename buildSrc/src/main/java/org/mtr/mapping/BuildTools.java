@@ -49,9 +49,8 @@ public final class BuildTools {
 			majorVersion = 0;
 			javaLanguageVersion = 8;
 		} else {
-			final String[] verParts = minecraftVersion.split("\.");
+			final String[] verParts = minecraftVersion.split("\\.");
 			final int first = Integer.parseInt(verParts[0]);
-			// Classic 1.x.y vs calendar 26.x.y (and later)
 			if (first >= 26) {
 				majorVersion = first;
 				javaLanguageVersion = 25;

@@ -2,12 +2,13 @@ import org.mtr.mapping.BuildTools
 
 plugins {
 	id "java"
-	id "fabric-loom" version "1.10-SNAPSHOT" apply false
+	// Unobfuscated MC 26.1+
+	id "net.fabricmc.fabric-loom" version "1.17-SNAPSHOT" apply false
 }
 
 subprojects {
 	apply plugin: "java"
-	apply plugin: "fabric-loom"
+	apply plugin: "net.fabricmc.fabric-loom"
 
 	final BuildTools buildTools = new BuildTools(project, rootProject.getProperties().getOrDefault("generate", "").toString())
 
@@ -18,14 +19,9 @@ subprojects {
 	dependencies {
 		implementation project(":common")
 		minecraft "com.mojang:minecraft:${buildTools.minecraftVersion}"
-		def isCalendar = buildTools.minecraftVersion.startsWith("26.") || buildTools.minecraftVersion.startsWith("27.")
-	if (!isCalendar) {
-		mappings "net.fabricmc:yarn:${buildTools.getYarnVersion()}:v2"
-	} else {
-		mappings loom.officialMojangMappings()
-	}
-		modImplementation "net.fabricmc:fabric-loader:${buildTools.getFabricVersion()}"
-		modImplementation "net.fabricmc.fabric-api:fabric-api:${buildTools.getFabricApiVersion()}"
+		// No mappings line — game jar is already official names
+		implementation "net.fabricmc:fabric-loader:${buildTools.getFabricVersion()}"
+		implementation "net.fabricmc.fabric-api:fabric-api:${buildTools.getFabricApiVersion()}"
 		compileOnly "com.google.code.findbugs:jsr305:+"
 		testImplementation "org.junit.jupiter:junit-jupiter-api:5.+"
 		testImplementation "org.junit.platform:junit-platform-launcher:1.+"
@@ -42,24 +38,14 @@ subprojects {
 		withJavadocJar()
 	}
 
-	remapJar {
-		doLast {
-			buildTools.copyBuildFile(true)
-			buildTools.copyBuildFile(false)
-		}
-	}
-
-	test {
-		useJUnitPlatform()
-		testLogging { showStandardStreams = true }
-	}
-
+	// No remapJar on unobfuscated Loom — publish plain jar
 	tasks.withType(AbstractArchiveTask).configureEach {
 		preserveFileTimestamps = false
 		reproducibleFileOrder = true
 	}
 
-	tasks.withType(Javadoc).tap {
-		configureEach { javadoc.options.addStringOption("Xdoclint:none", "-quiet") }
+	test {
+		useJUnitPlatform()
+		testLogging { showStandardStreams = true }
 	}
 }

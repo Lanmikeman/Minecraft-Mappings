@@ -44,8 +44,22 @@ public final class BuildTools {
 		final String[] projectNameSplit = path.getFileName().toString().split("-");
 		minecraftVersion = projectNameSplit[0];
 		isCommon = minecraftVersion.equals("common");
-		final int majorVersion = isCommon ? 0 : Integer.parseInt(minecraftVersion.split("\\.")[1]);
-		javaLanguageVersion = majorVersion <= 16 ? 8 : majorVersion == 17 ? 16 : 17;
+		final int majorVersion;
+		if (isCommon) {
+			majorVersion = 0;
+			javaLanguageVersion = 8;
+		} else {
+			final String[] verParts = minecraftVersion.split("\.");
+			final int first = Integer.parseInt(verParts[0]);
+			// Classic 1.x.y vs calendar 26.x.y (and later)
+			if (first >= 26) {
+				majorVersion = first;
+				javaLanguageVersion = 25;
+			} else {
+				majorVersion = Integer.parseInt(verParts[1]);
+				javaLanguageVersion = majorVersion <= 16 ? 8 : majorVersion == 17 ? 16 : majorVersion >= 21 ? 21 : 17;
+			}
+		}
 		isGeneratorProject = projectNameSplit.length > 1 && projectNameSplit[1].equals("generator");
 		final Path parentPath = path.getParent();
 		loader = parentPath.getFileName().toString();

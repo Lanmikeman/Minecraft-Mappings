@@ -18,7 +18,12 @@ subprojects {
 	dependencies {
 		implementation project(":common")
 		minecraft "com.mojang:minecraft:${buildTools.minecraftVersion}"
+		def isCalendar = buildTools.minecraftVersion.startsWith("26.") || buildTools.minecraftVersion.startsWith("27.")
+	if (!isCalendar) {
 		mappings "net.fabricmc:yarn:${buildTools.getYarnVersion()}:v2"
+	} else {
+		mappings loom.officialMojangMappings()
+	}
 		modImplementation "net.fabricmc:fabric-loader:${buildTools.getFabricVersion()}"
 		modImplementation "net.fabricmc.fabric-api:fabric-api:${buildTools.getFabricApiVersion()}"
 		compileOnly "com.google.code.findbugs:jsr305:+"

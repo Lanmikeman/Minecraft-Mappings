@@ -76,6 +76,11 @@ public abstract class BlockEntityExtension extends BlockEntityAbstractMapping {
 	}
 
 	@MappedMethod
+	public double getRenderDistance2() {
+		return 0;
+	}
+
+	@MappedMethod
 	public void markRemoved2() {
 		setRemoved();
 	}

@@ -1,6 +1,8 @@
 package org.mtr.mapping.mapper;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
@@ -9,7 +11,7 @@ import org.mtr.mapping.annotation.MappedMethod;
 import org.mtr.mapping.holder.Frustum;
 import org.mtr.mapping.holder.Identifier;
 
-public abstract class EntityRenderer<T extends EntityExtension> extends net.minecraft.client.renderer.entity.EntityRenderer<T, EntityRenderState> {
+public abstract class EntityRenderer<T extends EntityExtension> extends net.minecraft.client.renderer.entity.EntityRenderer<T, EntityRenderer.MtrEntityRenderState<T>> {
 
 	@MappedMethod
 	public EntityRenderer(Argument argument) {
@@ -18,14 +20,28 @@ public abstract class EntityRenderer<T extends EntityExtension> extends net.mine
 
 	@Deprecated
 	@Override
-	public EntityRenderState createRenderState() {
-		return new EntityRenderState();
+	public MtrEntityRenderState<T> createRenderState() {
+		return new MtrEntityRenderState<>();
 	}
 
 	@Deprecated
 	@Override
-	public void submit(EntityRenderState state, PoseStack matrices, SubmitNodeCollector queue, CameraRenderState camera) {
-		// TODO 26.1: bridge to GraphicsHolder-based render(entity, ...)
+	public void extractRenderState(T entity, MtrEntityRenderState<T> state, float tickDelta) {
+		super.extractRenderState(entity, state, tickDelta);
+		state.entity = entity;
+		state.tickDelta = tickDelta;
+		state.yaw = entity.getYRot();
+	}
+
+	@Deprecated
+	@Override
+	public void submit(MtrEntityRenderState<T> state, PoseStack matrices, SubmitNodeCollector queue, CameraRenderState camera) {
+		if (state.entity == null) {
+			return;
+		}
+		// Do not endBatch here — flushing mid entity/shadow pass causes z-fight/artifacts with Iris/Sodium.
+		final MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
+		GraphicsHolder.createInstanceSafe(matrices, bufferSource, graphicsHolder -> render(state.entity, state.yaw, state.tickDelta, graphicsHolder, state.lightCoords));
 	}
 
 	@MappedMethod
@@ -52,5 +68,12 @@ public abstract class EntityRenderer<T extends EntityExtension> extends net.mine
 		public Argument(EntityRendererProvider.Context data) {
 			this.data = data;
 		}
+	}
+
+	@Deprecated
+	public static final class MtrEntityRenderState<T extends EntityExtension> extends EntityRenderState {
+		T entity;
+		float tickDelta;
+		float yaw;
 	}
 }

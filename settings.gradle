@@ -7,11 +7,13 @@ pluginManagement {
 }
 
 plugins {
-	id "org.gradle.toolchains.foojay-resolver-convention" version "0.9.0"
+	// 1.0+ required for Gradle 9 (IBM_SEMERU removed from JvmVendorSpec)
+	id "org.gradle.toolchains.foojay-resolver-convention" version "1.0.0"
 }
 
 include("common")
 include("fabric:26.1.2-mapping")
-include("fabric:26.1.2-generator")
+// generator pulls full fabric-api; skip locally when maven.fabricmc TLS flakes
+// include("fabric:26.1.2-generator")
 
 rootProject.name = "Minecraft-Mappings"

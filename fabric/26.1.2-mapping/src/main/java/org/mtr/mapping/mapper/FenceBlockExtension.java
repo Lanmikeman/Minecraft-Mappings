@@ -6,6 +6,6 @@ import org.mtr.mapping.holder.*;
 public abstract class FenceBlockExtension extends FenceBlockAbstractMapping {
 	@MappedMethod
 	public FenceBlockExtension(BlockSettings blockSettings) {
-		super(blockSettings);
+		super(BlockHelper.applyPendingBlockId(blockSettings));
 	}
 }

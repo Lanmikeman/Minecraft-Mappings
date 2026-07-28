@@ -15,6 +15,7 @@ import org.mtr.mapping.tool.ColorHelper;
 import org.mtr.mapping.tool.DummyClass;
 
 import javax.annotation.Nullable;
+import java.lang.reflect.Field;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -38,23 +39,50 @@ public final class GraphicsHolder extends DummyClass {
 
 	@Deprecated
 	public static void createInstanceSafe(@Nullable PoseStack matrixStack, @Nullable MultiBufferSource vertexConsumerProvider, Consumer<GraphicsHolder> consumer) {
-		createInstanceSafe(new GraphicsHolder(matrixStack, vertexConsumerProvider), consumer);
+		final int poseDepth = getPoseDepth(matrixStack);
+		createInstanceSafe(new GraphicsHolder(matrixStack, vertexConsumerProvider), consumer, poseDepth);
 	}
 
 	@Deprecated
 	public static void createInstanceSafe(GuiGraphicsExtractor drawContext, Consumer<GraphicsHolder> consumer) {
-		createInstanceSafe(new GraphicsHolder(drawContext), consumer);
+		createInstanceSafe(new GraphicsHolder(drawContext), consumer, 0);
 	}
 
-	private static void createInstanceSafe(GraphicsHolder graphicsHolder, Consumer<GraphicsHolder> consumer) {
+	private static void createInstanceSafe(GraphicsHolder graphicsHolder, Consumer<GraphicsHolder> consumer, int poseDepth) {
 		try {
 			consumer.accept(graphicsHolder);
 		} catch (Exception e) {
 			logException(e);
+		} finally {
+			while (graphicsHolder.matrixPushes > 0) {
+				graphicsHolder.pop();
+			}
+			// ModelPart.pushPose has no try/finally — restore after Sodium/Iris vertex errors
+			restorePoseDepth(graphicsHolder.matrixStack, poseDepth);
 		}
+	}
 
-		while (graphicsHolder.matrixPushes > 0) {
-			graphicsHolder.pop();
+	private static int getPoseDepth(@Nullable PoseStack poseStack) {
+		if (poseStack == null) {
+			return 0;
+		}
+		try {
+			final Field lastIndex = PoseStack.class.getDeclaredField("lastIndex");
+			lastIndex.setAccessible(true);
+			return lastIndex.getInt(poseStack);
+		} catch (ReflectiveOperationException e) {
+			return poseStack.isEmpty() ? 0 : -1;
+		}
+	}
+
+	private static void restorePoseDepth(@Nullable PoseStack poseStack, int targetDepth) {
+		if (poseStack == null || targetDepth < 0) {
+			return;
+		}
+		int depth = getPoseDepth(poseStack);
+		while (depth > targetDepth) {
+			poseStack.popPose();
+			depth--;
 		}
 	}
 
@@ -75,7 +103,10 @@ public final class GraphicsHolder extends DummyClass {
 
 	@MappedMethod
 	public void push() {
-		if (matrixStack != null) {
+		if (drawContext != null) {
+			drawContext.pose().pushMatrix();
+			matrixPushes++;
+		} else if (matrixStack != null) {
 			matrixStack.pushPose();
 			matrixPushes++;
 		}
@@ -83,22 +114,31 @@ public final class GraphicsHolder extends DummyClass {
 
 	@MappedMethod
 	public void pop() {
-		if (matrixStack != null && matrixPushes > 0) {
-			matrixStack.popPose();
-			matrixPushes--;
+		if (matrixPushes > 0) {
+			if (drawContext != null) {
+				drawContext.pose().popMatrix();
+				matrixPushes--;
+			} else if (matrixStack != null) {
+				matrixStack.popPose();
+				matrixPushes--;
+			}
 		}
 	}
 
 	@MappedMethod
 	public void translate(double x, double y, double z) {
-		if (matrixStack != null) {
+		if (drawContext != null) {
+			drawContext.pose().translate((float) x, (float) y);
+		} else if (matrixStack != null) {
 			matrixStack.translate(x, y, z);
 		}
 	}
 
 	@MappedMethod
 	public void scale(float x, float y, float z) {
-		if (matrixStack != null) {
+		if (drawContext != null) {
+			drawContext.pose().scale(x, y);
+		} else if (matrixStack != null) {
 			matrixStack.scale(x, y, z);
 		}
 	}
@@ -119,7 +159,9 @@ public final class GraphicsHolder extends DummyClass {
 
 	@MappedMethod
 	public void rotateZRadians(float angle) {
-		if (matrixStack != null) {
+		if (drawContext != null) {
+			drawContext.pose().rotate(angle);
+		} else if (matrixStack != null) {
 			matrixStack.mulPose(Axis.ZP.rotation(angle));
 		}
 	}
@@ -140,7 +182,9 @@ public final class GraphicsHolder extends DummyClass {
 
 	@MappedMethod
 	public void rotateZDegrees(float angle) {
-		if (matrixStack != null) {
+		if (drawContext != null) {
+			drawContext.pose().rotate((float) Math.toRadians(angle));
+		} else if (matrixStack != null) {
 			matrixStack.mulPose(Axis.ZP.rotationDegrees(angle));
 		}
 	}
@@ -221,17 +265,38 @@ public final class GraphicsHolder extends DummyClass {
 
 	@MappedMethod
 	public void createVertexConsumer(RenderLayer renderLayer) {
-		// TODO 26.1 RenderType pipeline
+		if (vertexConsumerProvider != null) {
+			vertexConsumer = vertexConsumerProvider.getBuffer(renderLayer.data);
+		}
 	}
 
 	@MappedMethod
 	public void drawLineInWorld(float x1, float y1, float z1, float x2, float y2, float z2, int color) {
-		// TODO 26.1 vertex consumer
+		if (matrixStack != null && vertexConsumer != null) {
+			ColorHelper.unpackColor(color, (a, r, g, b) -> {
+				final PoseStack.Pose entry = matrixStack.last();
+				vertexConsumer.addVertex(entry.pose(), x1, y1, z1).setColor(r, g, b, a).setNormal(entry, 0, 1, 0);
+				vertexConsumer.addVertex(entry.pose(), x2, y2, z2).setColor(r, g, b, a).setNormal(entry, 0, 1, 0);
+			});
+		}
 	}
 
 	@MappedMethod
 	public void drawTextureInWorld(float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3, float x4, float y4, float z4, float u1, float v1, float u2, float v2, Direction facing, int color, int light) {
-		// TODO 26.1 vertex consumer
+		if (matrixStack != null && vertexConsumer != null) {
+			ColorHelper.unpackColor(color, (a, r, g, b) -> {
+				final Vector3i vector3i = facing.getVector();
+				final int x = vector3i.getX();
+				final int y = vector3i.getY();
+				final int z = vector3i.getZ();
+				final PoseStack.Pose entry = matrixStack.last();
+				final Matrix4f matrix4f = entry.pose();
+				vertexConsumer.addVertex(matrix4f, x1, y1, z1).setColor(r, g, b, a).setUv(u1, v2).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(entry, x, y, z);
+				vertexConsumer.addVertex(matrix4f, x2, y2, z2).setColor(r, g, b, a).setUv(u2, v2).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(entry, x, y, z);
+				vertexConsumer.addVertex(matrix4f, x3, y3, z3).setColor(r, g, b, a).setUv(u2, v1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(entry, x, y, z);
+				vertexConsumer.addVertex(matrix4f, x4, y4, z4).setColor(r, g, b, a).setUv(u1, v1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(entry, x, y, z);
+			});
+		}
 	}
 
 	@MappedMethod

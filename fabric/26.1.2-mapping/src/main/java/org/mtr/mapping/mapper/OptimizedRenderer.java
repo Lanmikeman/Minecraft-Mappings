@@ -16,11 +16,28 @@ public final class OptimizedRenderer extends DummyClass {
 	@MappedMethod public void queue(OptimizedModel model, VertexAttributeState state) {
 		batchManager.queue(model.getVertexArrays(), state);
 	}
+
+	@MappedMethod
+	public void queue(OptimizedModel optimizedModel, GraphicsHolder graphicsHolder, int color, int light) {
+		// GL batching pending; keep API for smoke compile.
+		queue(optimizedModel, new VertexAttributeState(color, light));
+	}
+
+	@MappedMethod
+	public void render(boolean renderTranslucent) {
+		drawAll();
+	}
+
 	@MappedMethod public void drawAll() { batchManager.drawAll(shaderManager); }
 
 	@MappedMethod
 	public static boolean hasOptimizedRendering() {
 		return false; // TODO GL pipeline
+	}
+
+	@MappedMethod
+	public static boolean renderingShadows() {
+		return org.mtr.mapping.render.shader.ModShaderHandler.renderingShadows();
 	}
 
 }

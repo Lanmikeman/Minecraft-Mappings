@@ -58,4 +58,25 @@ public abstract class BlockEntityExtension extends BlockEntityAbstractMapping {
 		return new BlockPos(getBlockPos());
 	}
 
+
+	@MappedMethod
+	public World getWorld2() {
+		final net.minecraft.world.level.Level level = getLevel();
+		return level == null ? null : new World(level);
+	}
+
+	@MappedMethod
+	public BlockState getCachedState2() {
+		return new BlockState(getBlockState());
+	}
+
+	@MappedMethod
+	public void markDirty2() {
+		setChanged();
+	}
+
+	@MappedMethod
+	public void markRemoved2() {
+		setRemoved();
+	}
 }

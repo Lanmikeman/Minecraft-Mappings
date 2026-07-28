@@ -109,6 +109,11 @@ public final class CommandBuilder<T extends ArgumentBuilder<CommandSourceStack, 
 		}
 
 		@MappedMethod
+		public World getWorld() {
+			return getLevel();
+		}
+
+		@MappedMethod
 		@Nullable
 		public ServerPlayerEntity getServerPlayer() {
 			final net.minecraft.server.level.ServerPlayer serverPlayerEntity = context.getSource().getPlayer();

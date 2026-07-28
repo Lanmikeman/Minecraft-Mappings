@@ -48,4 +48,8 @@ public abstract class EntityModelExtension<T extends EntityAbstractMapping> exte
 	@Override
 	public void render(GraphicsHolder graphicsHolder, int light, int overlay, float red, float green, float blue, float alpha) {
 	}
+
+	@MappedMethod
+	public void setAngles2(T entity, float limbAngle, float limbDistance, float animationProgress, float headYaw, float headPitch) {
+	}
 }

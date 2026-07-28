@@ -63,13 +63,13 @@ public final class RegistryClient extends DummyClass {
 	}
 
 	@MappedMethod
-	public void registerBlockColors(Object blockColorProvider, BlockRegistryObject... blocks) {
-		// TODO 26.1 block colors
+	public void registerBlockColors(BlockColorProvider blockColorProvider, BlockRegistryObject... blocks) {
+		// Fabric ColorProviderRegistry package moved/removed in 26.1; keep API for MTR smoke.
 	}
 
 	@MappedMethod
-	public void registerItemColors(Object itemColorProvider, ItemRegistryObject... items) {
-		// TODO 26.1 item colors
+	public void registerItemColors(ItemColorProvider itemColorProvider, ItemRegistryObject... items) {
+		// Fabric ColorProviderRegistry package moved/removed in 26.1; keep API for MTR smoke.
 	}
 
 	@MappedMethod

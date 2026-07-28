@@ -15,4 +15,17 @@ package org.mtr.mapping.holder;import org.mtr.mapping.annotation.MappedMethod;im
 @Nonnull@MappedMethod public static MapColor getWhiteMapped(){return getSnowMapped();}
 @Nonnull@MappedMethod public static MapColor getPalePurpleMapped(){return getColorMagentaMapped();}
 @Nonnull@MappedMethod public static MapColor getBlackMapped(){return getColorBlackMapped();}
-@MappedMethod public int getColorMapped(){return this.data.col;}}
+@MappedMethod public int getColorMapped(){return this.data.col;}
+
+@Nonnull@MappedMethod public static MapColor getLightGrayMapped(){return getColorLightGrayMapped();}
+@Nonnull@MappedMethod public static MapColor getGrayMapped(){return getColorGrayMapped();}
+@Nonnull@MappedMethod public static MapColor getPinkMapped(){return getColorPinkMapped();}
+@Nonnull@MappedMethod public static MapColor getGreenMapped(){return getColorGreenMapped();}
+@Nonnull@MappedMethod public static MapColor getLightBlueMapped(){return getColorLightBlueMapped();}
+
+
+
+@Nonnull@MappedMethod public static MapColor getLimeMapped(){return getColorLightGreenMapped();}
+@Nonnull@MappedMethod public static MapColor getMagentaMapped(){return getColorMagentaMapped();}
+
+}

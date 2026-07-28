@@ -6,6 +6,6 @@ import org.mtr.mapping.holder.*;
 public abstract class StairsBlockExtension extends StairsBlockAbstractMapping {
 	@MappedMethod
 	public StairsBlockExtension(BlockState baseBlockState, BlockSettings blockSettings) {
-		super(baseBlockState, blockSettings);
+		super(baseBlockState, BlockHelper.applyPendingBlockId(blockSettings));
 	}
 }

@@ -34,4 +34,15 @@ public abstract class AbstractSoundInstanceExtension extends AbstractSoundInstan
 	public void setPitch2(float pitch) {
 		this.pitch = pitch;
 	}
+
+	@MappedMethod
+	public static void iterateSoundIds(java.util.function.Consumer<Identifier> consumer) {
+		try {
+			final var keys = MinecraftClient.getInstance().data.getSoundManager().getAvailableSounds();
+			for (final var id : keys) {
+				consumer.accept(new Identifier(id));
+			}
+		} catch (Exception ignored) {
+		}
+	}
 }

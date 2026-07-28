@@ -33,12 +33,12 @@ public class EventRegistryClient extends DummyClass {
 
 	@MappedMethod
 	public void registerStartWorldTick(Consumer<ClientWorld> consumer) {
-		// TODO 26.1: START_WORLD_TICK renamed/removed
+		ClientTickEvents.START_LEVEL_TICK.register(clientWorld -> consumer.accept(new ClientWorld(clientWorld)));
 	}
 
 	@MappedMethod
 	public void registerEndWorldTick(Consumer<ClientWorld> consumer) {
-		// TODO 26.1: END_WORLD_TICK renamed/removed
+		ClientTickEvents.END_LEVEL_TICK.register(clientWorld -> consumer.accept(new ClientWorld(clientWorld)));
 	}
 
 	@MappedMethod

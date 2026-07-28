@@ -42,7 +42,12 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import javax.annotation.Nullable;
+
 public final class Registry extends DummyClass {
+
+	private static final ThreadLocal<Identifier> PENDING_BLOCK_ID = new ThreadLocal<>();
+	private static final ThreadLocal<Identifier> PENDING_ITEM_ID = new ThreadLocal<>();
 
 	Identifier packetsIdentifier;
 	CustomPacketPayload.Type<MtrPayload> payloadType;
@@ -52,6 +57,17 @@ public final class Registry extends DummyClass {
 	private final List<Consumer<CommandDispatcher<CommandSourceStack>>> commandsToRegister = new ArrayList<>();
 	private boolean payloadRegistered;
 
+	/** MC 26.1+ requires Properties#setId before Block/Item construction. */
+	@Nullable
+	public static Identifier peekPendingBlockId() {
+		return PENDING_BLOCK_ID.get();
+	}
+
+	@Nullable
+	public static Identifier peekPendingItemId() {
+		return PENDING_ITEM_ID.get();
+	}
+
 	@MappedMethod
 	public void init() {
 		objectsToRegister.forEach(Runnable::run);
@@ -60,7 +76,13 @@ public final class Registry extends DummyClass {
 
 	@MappedMethod
 	public BlockRegistryObject registerBlock(Identifier identifier, Supplier<Block> supplier) {
-		final Block block = supplier.get();
+		PENDING_BLOCK_ID.set(identifier);
+		final Block block;
+		try {
+			block = supplier.get();
+		} finally {
+			PENDING_BLOCK_ID.remove();
+		}
 		objectsToRegister.add(() -> net.minecraft.core.Registry.register(BuiltInRegistries.BLOCK, identifier.data, block.data));
 		return new BlockRegistryObject(block);
 	}
@@ -72,24 +94,48 @@ public final class Registry extends DummyClass {
 
 	@MappedMethod
 	public BlockRegistryObject registerBlockWithBlockItem(Identifier identifier, Supplier<Block> supplier, BiFunction<Block, ItemSettings, BlockItemExtension> function, CreativeModeTabHolder... creativeModeTabHolders) {
-		final Block block = supplier.get();
+		PENDING_BLOCK_ID.set(identifier);
+		final Block block;
+		try {
+			block = supplier.get();
+		} finally {
+			PENDING_BLOCK_ID.remove();
+		}
 		objectsToRegister.add(() -> net.minecraft.core.Registry.register(BuiltInRegistries.BLOCK, identifier.data, block.data));
-		final BlockItemExtension blockItemExtension = function.apply(block, new ItemSettings());
+		PENDING_ITEM_ID.set(identifier);
+		final BlockItemExtension blockItemExtension;
+		try {
+			blockItemExtension = function.apply(block, itemSettingsWithId(identifier));
+		} finally {
+			PENDING_ITEM_ID.remove();
+		}
 		objectsToRegister.add(() -> net.minecraft.core.Registry.register(BuiltInRegistries.ITEM, identifier.data, blockItemExtension));
 		for (final CreativeModeTabHolder creativeModeTabHolder : creativeModeTabHolders) {
-			// TODO 26.1 creative tab entries
+			CreativeModeTabEvents.modifyOutputEvent(ResourceKey.create(Registries.CREATIVE_MODE_TAB, creativeModeTabHolder.identifier.data))
+					.register(output -> output.accept(blockItemExtension));
 		}
 		return new BlockRegistryObject(block);
 	}
 
 	@MappedMethod
 	public ItemRegistryObject registerItem(Identifier identifier, Function<ItemSettings, Item> function, CreativeModeTabHolder... creativeModeTabHolders) {
-		final Item item = function.apply(new ItemSettings());
+		PENDING_ITEM_ID.set(identifier);
+		final Item item;
+		try {
+			item = function.apply(itemSettingsWithId(identifier));
+		} finally {
+			PENDING_ITEM_ID.remove();
+		}
 		objectsToRegister.add(() -> net.minecraft.core.Registry.register(BuiltInRegistries.ITEM, identifier.data, item.data));
 		for (final CreativeModeTabHolder creativeModeTabHolder : creativeModeTabHolders) {
-			// TODO 26.1 creative tab entries
+			CreativeModeTabEvents.modifyOutputEvent(ResourceKey.create(Registries.CREATIVE_MODE_TAB, creativeModeTabHolder.identifier.data))
+					.register(output -> output.accept(item.data));
 		}
 		return new ItemRegistryObject(item);
+	}
+
+	private static ItemSettings itemSettingsWithId(Identifier identifier) {
+		return new ItemSettings().setId(ResourceKey.create(Registries.ITEM, identifier.data));
 	}
 
 	@MappedMethod

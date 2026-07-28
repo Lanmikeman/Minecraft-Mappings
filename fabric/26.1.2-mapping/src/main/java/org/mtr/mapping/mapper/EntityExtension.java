@@ -29,7 +29,9 @@ public abstract class EntityExtension extends EntityAbstractMapping {
 
 	@MappedMethod
 	public void setPosition2(double x, double y, double z) {
-		super.setPos(x, y, z);
+		// absSnapTo also updates xo/yo/zo — required so camera/player interpolation
+		// does not rubber-band between the previous world position and the train.
+		absSnapTo(x, y, z);
 	}
 
 	/** Yarn Entity#getPos -> official position() */
@@ -47,6 +49,11 @@ public abstract class EntityExtension extends EntityAbstractMapping {
 	@MappedMethod
 	public UUID getUuid() {
 		return getUUID();
+	}
+
+	@MappedMethod
+	public Vector3d getCameraPosVec2(float tickDelta) {
+		return new Vector3d(getEyePosition(tickDelta));
 	}
 
 	@MappedMethod

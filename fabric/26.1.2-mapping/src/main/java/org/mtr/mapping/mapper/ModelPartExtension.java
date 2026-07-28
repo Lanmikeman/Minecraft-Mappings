@@ -1,11 +1,13 @@
 package org.mtr.mapping.mapper;
 
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.CubeDeformation;
 import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import org.mtr.mapping.annotation.MappedMethod;
+import org.mtr.mapping.render.shader.ModShaderHandler;
 import org.mtr.mapping.tool.DummyClass;
 
 import java.util.ArrayList;
@@ -94,7 +96,13 @@ public final class ModelPartExtension extends DummyClass {
 			modelPart.setPos(x, y, z);
 			modelPart.yRot = rotateY;
 			if (graphicsHolder.matrixStack != null && graphicsHolder.vertexConsumer != null) {
-				modelPart.render(graphicsHolder.matrixStack, graphicsHolder.vertexConsumer, light, overlay);
+				VertexConsumer consumer = graphicsHolder.vertexConsumer;
+				// Iris remaps entity buffers to IrisVertexFormats.ENTITY; Sodium's ModelPart
+				// fast path cannot convert EntityVertex → Iris format (missing 4x USHORT).
+				if (!ModShaderHandler.getInternalHandler().noShaderPackInUse()) {
+					consumer = new DelegatingVertexConsumer(consumer);
+				}
+				modelPart.render(graphicsHolder.matrixStack, consumer, light, overlay);
 			}
 		}
 	}

@@ -49,4 +49,46 @@ public final class RenderLayer extends HolderBase<net.minecraft.client.renderer.
 	public static RenderLayer getCutoutMipped() {
 		return getCutout();
 	}
+
+	@Nonnull
+	@MappedMethod
+	public static RenderLayer getEntityCutout(Identifier texture) {
+		return new RenderLayer(net.minecraft.client.renderer.rendertype.RenderTypes.entityCutout(texture.data));
+	}
+
+	@Nonnull
+	@MappedMethod
+	public static RenderLayer getEntityTranslucentCull(Identifier texture) {
+		return new RenderLayer(net.minecraft.client.renderer.rendertype.RenderTypes.entityTranslucentCullItemTarget(texture.data));
+	}
+
+	@Nonnull
+	@MappedMethod
+	public static RenderLayer getEntityTranslucent(Identifier texture) {
+		return new RenderLayer(net.minecraft.client.renderer.rendertype.RenderTypes.entityTranslucent(texture.data));
+	}
+
+	@Nonnull
+	@MappedMethod
+	public static RenderLayer getEntitySolid(Identifier texture) {
+		return new RenderLayer(net.minecraft.client.renderer.rendertype.RenderTypes.entitySolid(texture.data));
+	}
+
+	@Nonnull
+	@MappedMethod
+	public static RenderLayer getLines() {
+		return new RenderLayer(net.minecraft.client.renderer.rendertype.RenderTypes.lines());
+	}
+
+	@Nonnull
+	@MappedMethod
+	public static RenderLayer getText(Identifier id) {
+		return new RenderLayer(net.minecraft.client.renderer.rendertype.RenderTypes.text(id.data));
+	}
+
+	@Nonnull
+	@MappedMethod
+	public static RenderLayer getBeaconBeam(Identifier id, boolean translucent) {
+		return new RenderLayer(net.minecraft.client.renderer.rendertype.RenderTypes.beaconBeam(id.data, translucent));
+	}
 }

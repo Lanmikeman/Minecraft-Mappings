@@ -196,8 +196,8 @@ public interface MethodMaps {
 		addMethodMap1.add("MathHelper", "SQUARE_ROOT_OF_TWO", "SQRT_OF_TWO");
 		addMethodMap1.add("MathHelper", "stepTowards", "approach");
 		addMethodMap1.add("MathHelper", "stepUnwrappedAngleTowards", "approachDegrees");
-		addMethodMap1.add("MinecraftClient", "getLastFrameDuration", "getDeltaFrameTime");
-		addMethodMap1.add("MinecraftClient", "getTickDelta", "getFrameTime");
+		addMethodMap1.add("MinecraftClient", "getLastFrameDuration", "getDeltaFrameTime", "getGameTimeDeltaTicks");
+		addMethodMap1.add("MinecraftClient", "getTickDelta", "getFrameTime", "getGameTimeDeltaPartialTick");
 		addMethodMap1.add("MinecraftClient", "setScreen", "openScreen");
 		addMethodMap1.add("MinecraftServer", "getRunDirectory", "getServerDirectory");
 		addMethodMap1.add("NativeImage", "setColor", "setPixelColor", "setPixelRGBA");

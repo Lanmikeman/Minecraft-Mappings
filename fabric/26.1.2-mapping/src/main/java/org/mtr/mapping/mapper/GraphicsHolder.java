@@ -275,8 +275,9 @@ public final class GraphicsHolder extends DummyClass {
 		if (matrixStack != null && vertexConsumer != null) {
 			ColorHelper.unpackColor(color, (a, r, g, b) -> {
 				final PoseStack.Pose entry = matrixStack.last();
-				vertexConsumer.addVertex(entry.pose(), x1, y1, z1).setColor(r, g, b, a).setNormal(entry, 0, 1, 0);
-				vertexConsumer.addVertex(entry.pose(), x2, y2, z2).setColor(r, g, b, a).setNormal(entry, 0, 1, 0);
+				// MC 26.1 line formats include LINE_WIDTH (see ShapeRenderer / POSITION_COLOR_NORMAL_LINE_WIDTH)
+				vertexConsumer.addVertex(entry.pose(), x1, y1, z1).setColor(r, g, b, a).setNormal(entry, 0, 1, 0).setLineWidth(2.0F);
+				vertexConsumer.addVertex(entry.pose(), x2, y2, z2).setColor(r, g, b, a).setNormal(entry, 0, 1, 0).setLineWidth(2.0F);
 			});
 		}
 	}
@@ -285,22 +286,64 @@ public final class GraphicsHolder extends DummyClass {
 	public void drawTextureInWorld(float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3, float x4, float y4, float z4, float u1, float v1, float u2, float v2, Direction facing, int color, int light) {
 		if (matrixStack != null && vertexConsumer != null) {
 			ColorHelper.unpackColor(color, (a, r, g, b) -> {
-				final Vector3i vector3i = facing.getVector();
-				final int x = vector3i.getX();
-				final int y = vector3i.getY();
-				final int z = vector3i.getZ();
+				// Prefer geometric normal — gangways/barriers pass Direction.UP for vertical
+				// faces, and 26.1 entity cardinal lighting turns those faces black.
+				float nx = (y2 - y1) * (z3 - z1) - (z2 - z1) * (y3 - y1);
+				float ny = (z2 - z1) * (x3 - x1) - (x2 - x1) * (z3 - z1);
+				float nz = (x2 - x1) * (y3 - y1) - (y2 - y1) * (x3 - x1);
+				final float lenSq = nx * nx + ny * ny + nz * nz;
+				if (lenSq > 1.0E-12F) {
+					final float inv = 1.0F / (float) Math.sqrt(lenSq);
+					nx *= inv;
+					ny *= inv;
+					nz *= inv;
+				} else {
+					final Vector3i vector3i = facing.getVector();
+					nx = vector3i.getX();
+					ny = vector3i.getY();
+					nz = vector3i.getZ();
+				}
 				final PoseStack.Pose entry = matrixStack.last();
 				final Matrix4f matrix4f = entry.pose();
-				vertexConsumer.addVertex(matrix4f, x1, y1, z1).setColor(r, g, b, a).setUv(u1, v2).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(entry, x, y, z);
-				vertexConsumer.addVertex(matrix4f, x2, y2, z2).setColor(r, g, b, a).setUv(u2, v2).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(entry, x, y, z);
-				vertexConsumer.addVertex(matrix4f, x3, y3, z3).setColor(r, g, b, a).setUv(u2, v1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(entry, x, y, z);
-				vertexConsumer.addVertex(matrix4f, x4, y4, z4).setColor(r, g, b, a).setUv(u1, v1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(entry, x, y, z);
+				vertexConsumer.addVertex(matrix4f, x1, y1, z1).setColor(r, g, b, a).setUv(u1, v2).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(entry, nx, ny, nz);
+				vertexConsumer.addVertex(matrix4f, x2, y2, z2).setColor(r, g, b, a).setUv(u2, v2).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(entry, nx, ny, nz);
+				vertexConsumer.addVertex(matrix4f, x3, y3, z3).setColor(r, g, b, a).setUv(u2, v1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(entry, nx, ny, nz);
+				vertexConsumer.addVertex(matrix4f, x4, y4, z4).setColor(r, g, b, a).setUv(u1, v1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(entry, nx, ny, nz);
 			});
 		}
 	}
 
 	@MappedMethod
 	public void renderEntity(Entity entity, double x, double y, double z, float yaw, float tickDelta, int light) {
-		// Entity render pipeline changed in 26.1 (extract/submit); no-op until EntityRenderState port.
+		if (matrixStack == null || entity == null || entity.data == null) {
+			return;
+		}
+		try {
+			final MinecraftClient minecraft = MinecraftClient.getInstance();
+			final net.minecraft.client.Minecraft mc = minecraft.data;
+			final net.minecraft.client.renderer.entity.EntityRenderDispatcher dispatcher = mc.getEntityRenderDispatcher();
+			final net.minecraft.client.renderer.entity.state.EntityRenderState state = dispatcher.extractEntity(entity.data, tickDelta);
+			final net.minecraft.client.renderer.state.level.CameraRenderState camera =
+					mc.gameRenderer.getGameRenderState().levelRenderState.cameraRenderState;
+			final net.minecraft.client.renderer.SubmitNodeCollector collector = getSubmitNodeCollector(mc.levelRenderer);
+			if (collector == null) {
+				return;
+			}
+			dispatcher.submit(state, camera, x, y, z, matrixStack, collector);
+		} catch (Exception e) {
+			logException(e);
+		}
+	}
+
+	@Nullable
+	private static net.minecraft.client.renderer.SubmitNodeCollector getSubmitNodeCollector(net.minecraft.client.renderer.LevelRenderer levelRenderer) {
+		try {
+			final java.lang.reflect.Field field = net.minecraft.client.renderer.LevelRenderer.class.getDeclaredField("submitNodeStorage");
+			field.setAccessible(true);
+			return (net.minecraft.client.renderer.SubmitNodeCollector) field.get(levelRenderer);
+		} catch (ReflectiveOperationException e) {
+			logException(e);
+			return null;
+		}
 	}
 }

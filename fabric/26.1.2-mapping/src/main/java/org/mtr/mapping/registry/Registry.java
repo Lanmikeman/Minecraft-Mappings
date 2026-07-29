@@ -33,7 +33,9 @@ import org.mtr.mapping.tool.HolderBase;
 import org.mtr.mapping.tool.PacketBufferReceiver;
 import org.mtr.mapping.tool.PacketBufferSender;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,8 +48,13 @@ import javax.annotation.Nullable;
 
 public final class Registry extends DummyClass {
 
-	private static final ThreadLocal<Identifier> PENDING_BLOCK_ID = new ThreadLocal<>();
-	private static final ThreadLocal<Identifier> PENDING_ITEM_ID = new ThreadLocal<>();
+	/**
+	 * Stack (not a single value): nested {@code registerBlock*} during class init
+	 * (addon → MTR Blocks static init, circular CreativeModeTabs, etc.) must restore
+	 * the outer pending id after the inner registration finishes.
+	 */
+	private static final ThreadLocal<Deque<Identifier>> PENDING_BLOCK_IDS = ThreadLocal.withInitial(ArrayDeque::new);
+	private static final ThreadLocal<Deque<Identifier>> PENDING_ITEM_IDS = ThreadLocal.withInitial(ArrayDeque::new);
 
 	Identifier packetsIdentifier;
 	CustomPacketPayload.Type<MtrPayload> payloadType;
@@ -60,12 +67,12 @@ public final class Registry extends DummyClass {
 	/** MC 26.1+ requires Properties#setId before Block/Item construction. */
 	@Nullable
 	public static Identifier peekPendingBlockId() {
-		return PENDING_BLOCK_ID.get();
+		return PENDING_BLOCK_IDS.get().peek();
 	}
 
 	@Nullable
 	public static Identifier peekPendingItemId() {
-		return PENDING_ITEM_ID.get();
+		return PENDING_ITEM_IDS.get().peek();
 	}
 
 	@MappedMethod
@@ -76,12 +83,12 @@ public final class Registry extends DummyClass {
 
 	@MappedMethod
 	public BlockRegistryObject registerBlock(Identifier identifier, Supplier<Block> supplier) {
-		PENDING_BLOCK_ID.set(identifier);
+		PENDING_BLOCK_IDS.get().push(identifier);
 		final Block block;
 		try {
 			block = supplier.get();
 		} finally {
-			PENDING_BLOCK_ID.remove();
+			PENDING_BLOCK_IDS.get().pop();
 		}
 		objectsToRegister.add(() -> net.minecraft.core.Registry.register(BuiltInRegistries.BLOCK, identifier.data, block.data));
 		return new BlockRegistryObject(block);
@@ -94,20 +101,20 @@ public final class Registry extends DummyClass {
 
 	@MappedMethod
 	public BlockRegistryObject registerBlockWithBlockItem(Identifier identifier, Supplier<Block> supplier, BiFunction<Block, ItemSettings, BlockItemExtension> function, CreativeModeTabHolder... creativeModeTabHolders) {
-		PENDING_BLOCK_ID.set(identifier);
+		PENDING_BLOCK_IDS.get().push(identifier);
 		final Block block;
 		try {
 			block = supplier.get();
 		} finally {
-			PENDING_BLOCK_ID.remove();
+			PENDING_BLOCK_IDS.get().pop();
 		}
 		objectsToRegister.add(() -> net.minecraft.core.Registry.register(BuiltInRegistries.BLOCK, identifier.data, block.data));
-		PENDING_ITEM_ID.set(identifier);
+		PENDING_ITEM_IDS.get().push(identifier);
 		final BlockItemExtension blockItemExtension;
 		try {
 			blockItemExtension = function.apply(block, itemSettingsWithId(identifier));
 		} finally {
-			PENDING_ITEM_ID.remove();
+			PENDING_ITEM_IDS.get().pop();
 		}
 		objectsToRegister.add(() -> net.minecraft.core.Registry.register(BuiltInRegistries.ITEM, identifier.data, blockItemExtension));
 		for (final CreativeModeTabHolder creativeModeTabHolder : creativeModeTabHolders) {
@@ -119,12 +126,12 @@ public final class Registry extends DummyClass {
 
 	@MappedMethod
 	public ItemRegistryObject registerItem(Identifier identifier, Function<ItemSettings, Item> function, CreativeModeTabHolder... creativeModeTabHolders) {
-		PENDING_ITEM_ID.set(identifier);
+		PENDING_ITEM_IDS.get().push(identifier);
 		final Item item;
 		try {
 			item = function.apply(itemSettingsWithId(identifier));
 		} finally {
-			PENDING_ITEM_ID.remove();
+			PENDING_ITEM_IDS.get().pop();
 		}
 		objectsToRegister.add(() -> net.minecraft.core.Registry.register(BuiltInRegistries.ITEM, identifier.data, item.data));
 		for (final CreativeModeTabHolder creativeModeTabHolder : creativeModeTabHolders) {

@@ -1,13 +1,17 @@
 package org.mtr.mapping.mapper;
 
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.network.chat.Component;
 import org.mtr.mapping.annotation.MappedMethod;
 import org.mtr.mapping.holder.*;
 
 import java.util.function.Consumer;
 
 /**
- * Checkbox bridge for MC 26.1.2 — CheckboxWidgetAbstractMapping not regenerated yet,
- * so this extends {@link ClickableWidgetExtension} with the yarn-facing API MTR uses.
+ * Checkbox bridge for MC 26.1.2 — draws a visible box + label (vanilla Checkbox API
+ * differs enough that a lightweight custom widget is more reliable for MTR screens).
  */
 public class CheckboxWidgetExtension extends ClickableWidgetExtension {
 
@@ -29,7 +33,8 @@ public class CheckboxWidgetExtension extends ClickableWidgetExtension {
 	public CheckboxWidgetExtension(int x, int y, int width, int height, MutableText message, boolean showMessage, Consumer<Boolean> onPress) {
 		super(x, y, width, height, showMessage ? new Text(message.data) : new Text(TextHelper.literal("").data));
 		this.showMessage = showMessage;
-		this.onPress = onPress == null ? ignored -> {} : onPress;
+		this.onPress = onPress == null ? ignored -> {
+		} : onPress;
 		this.checked = false;
 	}
 
@@ -58,8 +63,37 @@ public class CheckboxWidgetExtension extends ClickableWidgetExtension {
 
 	@Override
 	@MappedMethod
+	public void render(GraphicsHolder graphicsHolder, int mouseX, int mouseY, float delta) {
+		final GuiGraphicsExtractor drawContext = graphicsHolder.drawContext;
+		if (drawContext == null || !visible) {
+			return;
+		}
+
+		final int box = Math.min(getHeight2(), 20);
+		final int x = getX2();
+		final int y = getY2() + Math.max(0, (getHeight2() - box) / 2);
+		final boolean hovered = mouseX >= getX2() && mouseY >= getY2() && mouseX < getX2() + getWidth2() && mouseY < getY2() + getHeight2();
+
+		drawContext.fill(x, y, x + box, y + box, 0xFF000000);
+		drawContext.fill(x + 1, y + 1, x + box - 1, y + box - 1, hovered ? 0xFFE0E0E0 : 0xFFFFFFFF);
+		if (checked) {
+			drawContext.fill(x + 4, y + 4, x + box - 4, y + box - 4, 0xFF222222);
+		}
+
+		if (showMessage) {
+			final Font font = Minecraft.getInstance().font;
+			final Component message = getMessage();
+			drawContext.text(font, message, x + box + 4, y + (box - 8) / 2, 0xFFFFFF);
+		}
+	}
+
+	@Override
+	@MappedMethod
 	public boolean mouseClicked2(double mouseX, double mouseY, int button) {
-		if (button == 0) {
+		if (!visible || !active || button != 0) {
+			return false;
+		}
+		if (mouseX >= getX2() && mouseY >= getY2() && mouseX < getX2() + getWidth2() && mouseY < getY2() + getHeight2()) {
 			checked = !checked;
 			onPress.accept(checked);
 			return true;

@@ -19,6 +19,7 @@ subprojects {
 	dependencies {
 		implementation project(":common")
 		minecraft "com.mojang:minecraft:${buildTools.minecraftVersion}"
+		implementation "de.javagl:obj:0.3.0"
 		// No mappings line — game jar is already official names
 		implementation "net.fabricmc:fabric-loader:${buildTools.getFabricVersion()}"
 		implementation "net.fabricmc.fabric-api:fabric-api:${buildTools.getFabricApiVersion()}"

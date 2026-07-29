@@ -43,14 +43,67 @@ public class GuiDrawing extends DummyClass {
 		}
 	}
 
-	/** Quad with four corners (used by driving HUD). Approximate as axis-aligned bounds for now. */
+	/** Quad with four corners (used by driving HUD). Draw as two triangles via GUI fill strips when axis-aligned; otherwise approximate with AABB fill + note that 26.1 GuiGraphicsExtractor has no free quads. */
 	@MappedMethod
 	public void drawRectangle(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, int color) {
-		final double minX = Math.min(Math.min(x1, x2), Math.min(x3, x4));
-		final double maxX = Math.max(Math.max(x1, x2), Math.max(x3, x4));
+		if (drawContext == null) {
+			return;
+		}
+		// Fast path: axis-aligned rectangle
+		if (almostEqual(y1, y2) && almostEqual(y3, y4) && almostEqual(x1, x4) && almostEqual(x2, x3)) {
+			drawRectangle(Math.min(x1, x2), Math.min(y1, y3), Math.max(x1, x2), Math.max(y1, y3), color);
+			return;
+		}
+		if (almostEqual(x1, x2) && almostEqual(x3, x4) && almostEqual(y1, y4) && almostEqual(y2, y3)) {
+			drawRectangle(Math.min(x1, x3), Math.min(y1, y2), Math.max(x1, x3), Math.max(y1, y2), color);
+			return;
+		}
+		// Skewed quad: scanline-fill between edges (good enough for driving HUD wedges)
 		final double minY = Math.min(Math.min(y1, y2), Math.min(y3, y4));
 		final double maxY = Math.max(Math.max(y1, y2), Math.max(y3, y4));
-		drawRectangle(minX, minY, maxX, maxY, color);
+		final int opaque = withOpaqueAlpha(color);
+		final int yStart = (int) Math.floor(minY);
+		final int yEnd = (int) Math.ceil(maxY);
+		for (int y = yStart; y < yEnd; y++) {
+			final double yt = y + 0.5;
+			double xMin = Double.POSITIVE_INFINITY;
+			double xMax = Double.NEGATIVE_INFINITY;
+			xMin = updateMin(xMin, edgeX(x1, y1, x2, y2, yt));
+			xMax = updateMax(xMax, edgeX(x1, y1, x2, y2, yt));
+			xMin = updateMin(xMin, edgeX(x2, y2, x3, y3, yt));
+			xMax = updateMax(xMax, edgeX(x2, y2, x3, y3, yt));
+			xMin = updateMin(xMin, edgeX(x3, y3, x4, y4, yt));
+			xMax = updateMax(xMax, edgeX(x3, y3, x4, y4, yt));
+			xMin = updateMin(xMin, edgeX(x4, y4, x1, y1, yt));
+			xMax = updateMax(xMax, edgeX(x4, y4, x1, y1, yt));
+			if (xMin < xMax) {
+				drawContext.fill((int) Math.floor(xMin), y, (int) Math.ceil(xMax), y + 1, opaque);
+			}
+		}
+	}
+
+	private static boolean almostEqual(double a, double b) {
+		return Math.abs(a - b) < 0.01;
+	}
+
+	private static double updateMin(double current, double value) {
+		return Double.isFinite(value) ? Math.min(current, value) : current;
+	}
+
+	private static double updateMax(double current, double value) {
+		return Double.isFinite(value) ? Math.max(current, value) : current;
+	}
+
+	/** Intersection X of horizontal line y=yt with segment (xA,yA)-(xB,yB), or NaN if none. */
+	private static double edgeX(double xA, double yA, double xB, double yB, double yt) {
+		if ((yA > yt && yB > yt) || (yA < yt && yB < yt) || Math.abs(yA - yB) < 1.0E-6) {
+			return Double.NaN;
+		}
+		final double t = (yt - yA) / (yB - yA);
+		if (t < 0 || t > 1) {
+			return Double.NaN;
+		}
+		return xA + t * (xB - xA);
 	}
 
 	private static int withOpaqueAlpha(int color) {

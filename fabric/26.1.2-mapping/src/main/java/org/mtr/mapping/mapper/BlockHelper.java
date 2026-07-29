@@ -89,9 +89,9 @@ public interface BlockHelper extends DummyInterface {
 	@MappedMethod
 	static BlockSettings applyPendingBlockId(BlockSettings blockSettings) {
 		final Identifier pending = org.mtr.mapping.registry.Registry.peekPendingBlockId();
-		if (pending != null) {
-			return new BlockSettings(blockSettings.data.setId(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.BLOCK, pending.data)));
+		if (pending == null) {
+			throw new IllegalStateException("Block constructed without pending registry id (MC 26.1+). Construct blocks only inside Registry.registerBlock* suppliers.");
 		}
-		return blockSettings;
+		return blockSettings.setId(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.BLOCK, pending.data));
 	}
 }

@@ -39,9 +39,22 @@ public abstract class EntityRenderer<T extends EntityExtension> extends net.mine
 		if (state.entity == null) {
 			return;
 		}
-		// Do not endBatch here — flushing mid entity/shadow pass causes z-fight/artifacts with Iris/Sodium.
-		final MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
-		GraphicsHolder.createInstanceSafe(matrices, bufferSource, graphicsHolder -> render(state.entity, state.yaw, state.tickDelta, graphicsHolder, state.lightCoords));
+		// Iris shadow pass uses light-space matrices; player-camera lag correction creates ghosts.
+		if (OptimizedRenderer.renderingShadows()) {
+			return;
+		}
+		// Cancel any residual entity-vs-camera lag in the PoseStack so world-anchored
+		// geometry (rails/vehicles) stays locked to the live camera origin.
+		final net.minecraft.world.phys.Vec3 cameraPos = camera.pos;
+		matrices.pushPose();
+		matrices.translate(cameraPos.x - state.x, cameraPos.y - state.y, cameraPos.z - state.z);
+		try {
+			// Do not endBatch here — flushing mid entity/shadow pass causes z-fight/artifacts with Iris/Sodium.
+			final MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
+			GraphicsHolder.createInstanceSafe(matrices, bufferSource, graphicsHolder -> render(state.entity, state.yaw, state.tickDelta, graphicsHolder, state.lightCoords));
+		} finally {
+			matrices.popPose();
+		}
 	}
 
 	@MappedMethod
@@ -72,8 +85,8 @@ public abstract class EntityRenderer<T extends EntityExtension> extends net.mine
 
 	@Deprecated
 	public static final class MtrEntityRenderState<T extends EntityExtension> extends EntityRenderState {
-		T entity;
-		float tickDelta;
-		float yaw;
+		public T entity;
+		public float tickDelta;
+		public float yaw;
 	}
 }

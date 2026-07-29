@@ -10,38 +10,42 @@ import java.util.List;
 import java.util.Map;
 
 public final class BatchManager {
-	private final Map<MaterialProperties, List<RenderCall>> opaque = new HashMap<>();
-	private final Map<MaterialProperties, List<RenderCall>> translucent = new HashMap<>();
+	private final Map<MaterialProperties, List<ShaderManager.RenderCall>> opaqueBatches = new HashMap<>();
+	private final Map<MaterialProperties, List<ShaderManager.RenderCall>> cutoutBatches = new HashMap<>();
+	private final Map<MaterialProperties, List<ShaderManager.RenderCall>> translucentBatches = new HashMap<>();
 
-	public void queue(VertexArray vertexArray, VertexAttributeState state) {
-		(vertexArray.materialProperties != null && vertexArray.materialProperties.translucent ? translucent : opaque)
-			.computeIfAbsent(vertexArray.materialProperties, k -> new ArrayList<>())
-			.add(new RenderCall(vertexArray, state));
+	public void queue(VertexArray vertexArray, VertexAttributeState vertexAttributeState) {
+		final MaterialProperties materialProperties = vertexArray.materialProperties;
+		(materialProperties.translucent ? translucentBatches : materialProperties.cutoutHack ? cutoutBatches : opaqueBatches)
+				.computeIfAbsent(materialProperties, key -> new ArrayList<>())
+				.add(new ShaderManager.RenderCall(vertexArray, vertexAttributeState));
 	}
 
-	public void queue(List<VertexArray> arrays, VertexAttributeState state) {
-		arrays.forEach(a -> queue(a, state));
+	public void queue(List<VertexArray> vertexArrays, VertexAttributeState vertexAttributeState) {
+		vertexArrays.forEach(vertexArray -> queue(vertexArray, vertexAttributeState));
 	}
 
-	public void drawAll(ShaderManager shaderManager) {
-		draw(opaque, shaderManager);
-		draw(translucent, shaderManager);
-		opaque.clear(); translucent.clear();
+	public boolean drawOpaque(ShaderManager shaderManager) {
+		if (!shaderManager.drawBatches(opaqueBatches)) {
+			return false;
+		}
+		return shaderManager.drawBatches(cutoutBatches);
 	}
 
-	private void draw(Map<MaterialProperties, List<RenderCall>> batches, ShaderManager shaderManager) {
-		batches.forEach((mat, calls) -> {
-			shaderManager.setupShaderBatch(mat);
-			mat.setupGlState();
-			for (RenderCall call : calls) {
-				call.state.apply();
-				call.vertexArray.bind();
-				call.vertexArray.draw();
-			}
-			mat.cleanupGlState();
-			shaderManager.finish();
-		});
+	public void drawTranslucent(ShaderManager shaderManager) {
+		shaderManager.drawBatches(translucentBatches);
 	}
 
-	private record RenderCall(VertexArray vertexArray, VertexAttributeState state) {}
+	public void discardTranslucent() {
+		translucentBatches.clear();
+	}
+
+	public void drawAll(ShaderManager shaderManager, boolean renderTranslucent) {
+		drawOpaque(shaderManager);
+		if (renderTranslucent) {
+			drawTranslucent(shaderManager);
+		} else {
+			discardTranslucent();
+		}
+	}
 }
